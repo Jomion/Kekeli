@@ -1,0 +1,153 @@
+/* ===== Variables globales ===== */
+:root {
+  --bleu-principal: #1d4ed8;
+  --bleu-fonce: #1e3a8a;
+  --bleu-clair: #eff6ff;
+  --texte-fonce: #1f2937;
+  --texte-gris: #6b7280;
+  --blanc: #ffffff;
+  --bordure: #e5e7eb;
+  --radius: 12px;
+}
+
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: -apple-system, "Segoe UI", Roboto, Arial, sans-serif;
+  color: var(--texte-fonce);
+  background: var(--blanc);
+  line-height: 1.5;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* ===== En-tête ===== */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 16px 20px;
+  background: var(--blanc);
+  border-bottom: 1px solid var(--bordure);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.logo-placeholder {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--bleu-principal);
+}
+
+.menu-toggle {
+  font-size: 26px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--texte-fonce);
+  padding: 6px 10px;
+}
+
+/* ===== Menu (mobile-first : caché par défaut) ===== */
+.menu {
+  display: none;
+  flex-direction: column;
+  background: var(--blanc);
+  border-bottom: 1px solid var(--bordure);
+}
+
+.menu.ouvert {
+  display: flex;
+}
+
+.menu a {
+  padding: 14px 20px;
+  font-size: 16px;
+  border-bottom: 1px solid var(--bordure);
+}
+
+.menu a:active {
+  background: var(--bleu-clair);
+}
+
+/* ===== Hero ===== */
+.hero {
+  text-align: center;
+  padding: 40px 20px 24px;
+  background: var(--bleu-clair);
+}
+
+.hero h1 {
+  font-size: 32px;
+  color: var(--bleu-fonce);
+  margin-bottom: 8px;
+}
+
+.slogan {
+  font-size: 15px;
+  color: var(--texte-gris);
+}
+
+/* ===== Liste des classes ===== */
+.classes-list {
+  padding: 24px 20px;
+}
+
+.classes-list h2 {
+  font-size: 18px;
+  margin-bottom: 16px;
+}
+
+#classesContainer {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.carte-classe {
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: 24px 12px;
+  background: var(--bleu-clair);
+  border: 1px solid var(--bordure);
+  border-radius: var(--radius);
+  font-weight: 600;
+  font-size: 16px;
+  color: var(--bleu-fonce);
+  min-height: 64px;
+}
+
+.carte-classe:active {
+  background: var(--bleu-principal);
+  color: var(--blanc);
+}
+
+/* ===== Écrans plus larges (ordinateur) ===== */
+@media (min-width: 768px) {
+  .menu-toggle {
+    display: none;
+  }
+
+  .menu {
+    display: flex;
+    flex-direction: row;
+  }
+
+  .menu a {
+    border-bottom: none;
+    padding: 10px 16px;
+  }
+
+  #classesContainer {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
