@@ -1,0 +1,40 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Tableau de bord - KEKELI</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/admin.css">
+</head>
+<body>
+
+  <header class="admin-header">
+    <h1>Tableau de bord</h1>
+    <button class="btn-deconnexion" id="btnDeconnexion">Déconnexion</button>
+  </header>
+
+  <main class="admin-cartes">
+    <a href="gestion-classes.html" class="admin-carte">📚<br>Classes</a>
+    <a href="gestion-matieres.html" class="admin-carte">📖<br>Matières</a>
+    <a href="gestion-sous-matieres.html" class="admin-carte">📑<br>Sous-matières</a>
+    <a href="gestion-unites-dossiers.html" class="admin-carte">🗂️<br>Unités/Dossiers</a>
+    <a href="gestion-sa.html" class="admin-carte">📌<br>SA</a>
+    <a href="gestion-seances.html" class="admin-carte">📝<br>Séances</a>
+    <a href="gestion-exercices.html" class="admin-carte">✏️<br>Exercices</a>
+    <a href="gestion-quiz.html" class="admin-carte">🧠<br>Quiz</a>
+    <a href="gestion-epreuves.html" class="admin-carte">📄<br>Épreuves</a>
+    <a href="gestion-ressources.html" class="admin-carte">📁<br>Ressources</a>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../../js/config.js"></script>
+  <script src="../../js/supabaseClient.js"></script>
+  <script src="../../js/auth.js"></script>
+  <script>
+    verifierConnexion();
+    document.getElementById('btnDeconnexion').addEventListener('click', deconnecter);
+  </script>
+
+</body>
+</html>
