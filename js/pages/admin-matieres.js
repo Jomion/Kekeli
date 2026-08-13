@@ -12,7 +12,10 @@ async function chargerClasses() {
     .select('*')
     .order('ordre', { ascending: true });
 
-  if (error) return;
+  if (error) {
+    alert("Erreur classes : " + error.message);
+    return;
+  }
 
   classesDisponibles = data;
 
