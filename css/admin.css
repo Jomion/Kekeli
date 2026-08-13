@@ -134,3 +134,49 @@
     grid-template-columns: repeat(4, 1fr);
   }
 }
+/* ===== Contenu admin (formulaires + listes) ===== */
+.admin-contenu {
+  padding: 20px;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.admin-form-inline {
+  max-width: none;
+  margin-bottom: 24px;
+}
+
+.admin-liste {
+  display: flex;
+  flex-direction: column;
+  gap: 10px;
+}
+
+.admin-ligne {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 16px;
+  background: var(--bleu-clair);
+  border: 1px solid var(--bordure);
+  border-radius: 10px;
+  font-size: 15px;
+}
+
+.admin-ligne small {
+  color: var(--texte-gris);
+}
+
+.admin-ligne-actions {
+  display: flex;
+  gap: 8px;
+}
+
+.admin-ligne-actions button {
+  background: var(--blanc);
+  border: 1px solid var(--bordure);
+  border-radius: 6px;
+  padding: 6px 10px;
+  font-size: 16px;
+  cursor: pointer;
+  }
