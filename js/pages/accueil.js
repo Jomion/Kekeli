@@ -8,7 +8,7 @@ async function chargerClasses() {
     .order('ordre', { ascending: true });
 
   if (error) {
-    container.innerHTML = "Erreur de chargement des classes.";
+    container.innerHTML = "Erreur : " + error.message;
     console.error(error);
     return;
   }
