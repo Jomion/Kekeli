@@ -1,0 +1,44 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KEKELI - L'éducation qui éclaire l'avenir</title>
+  <link rel="stylesheet" href="css/style.css">
+</head>
+<body>
+
+  <header class="header">
+    <div class="logo-placeholder">KEKELI</div>
+    <button class="menu-toggle" id="menuToggle">☰</button>
+  </header>
+
+  <nav class="menu" id="menu">
+    <a href="pages/cours.html">Cours</a>
+    <a href="pages/exercices.html">Exercices</a>
+    <a href="pages/quiz.html">Quiz</a>
+    <a href="pages/matieres.html">Matières</a>
+    <a href="pages/epreuves.html">Épreuves</a>
+    <a href="pages/ressources.html">Ressources</a>
+    <a href="pages/recherche.html">Recherche</a>
+  </nav>
+
+  <main>
+    <section class="hero">
+      <h1>KEKELI</h1>
+      <p class="slogan">L'éducation qui éclaire l'avenir.</p>
+    </section>
+
+    <section class="classes-list">
+      <h2>Choisis ta classe</h2>
+      <div id="classesContainer">Chargement des classes...</div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="js/config.js"></script>
+  <script src="js/supabaseClient.js"></script>
+  <script src="js/pages/accueil.js"></script>
+
+</body>
+</html>
