@@ -61,8 +61,8 @@ function activerModeEdition(id, listeClasses) {
 
 // Supprime une classe
 async function supprimerClasse(id) {
-  const confirmation = confirm("Supprimer cette classe ? Tout son contenu lié sera aussi supprimé.");
-  if (!confirmation) return;
+  const confirmation = window.confirm("Supprimer cette classe ? Tout son contenu lié sera aussi supprimé.");
+  if (confirmation !== true) return;
 
   const { error } = await supabaseClient.from('classes').delete().eq('id', id);
 
