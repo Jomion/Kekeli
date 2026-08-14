@@ -17,11 +17,8 @@
   <main class="admin-contenu">
 
     <form id="formAjout" class="admin-form admin-form-inline">
-      <label for="classe">Classe</label>
-      <select id="classe" required>
-        <option value="">-- Choisir une classe --</option>
-      </select>
-
+      <label for="classe">Classe(s) — Ctrl/Cmd + clic pour plusieurs</label>
+      <select id="classe" multiple size="6" required></select>
       <label for="nom">Nom de la matière</label>
       <input type="text" id="nom" placeholder="Ex: Français" required>
 
