@@ -180,3 +180,56 @@
   font-size: 16px;
   cursor: pointer;
   }
+/* ===== Textarea (pour les séances) ===== */
+.admin-form textarea {
+  padding: 12px 14px;
+  border: 1px solid var(--bordure);
+  border-radius: 8px;
+  font-size: 16px;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.admin-form textarea:focus {
+  outline: none;
+  border-color: var(--bleu-principal);
+}
+
+.admin-form select {
+  padding: 12px 14px;
+  border: 1px solid var(--bordure);
+  border-radius: 8px;
+  font-size: 16px;
+  background: var(--blanc);
+}
+
+.admin-form select:focus {
+  outline: none;
+  border-color: var(--bleu-principal);
+}/* ===== Textarea (pour les séances) ===== */
+.admin-form textarea {
+  padding: 12px 14px;
+  border: 1px solid var(--bordure);
+  border-radius: 8px;
+  font-size: 16px;
+  font-family: inherit;
+  resize: vertical;
+}
+
+.admin-form textarea:focus {
+  outline: none;
+  border-color: var(--bleu-principal);
+}
+
+.admin-form select {
+  padding: 12px 14px;
+  border: 1px solid var(--bordure);
+  border-radius: 8px;
+  font-size: 16px;
+  background: var(--blanc);
+}
+
+.admin-form select:focus {
+  outline: none;
+  border-color: var(--bleu-principal);
+}
