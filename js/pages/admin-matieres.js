@@ -114,4 +114,35 @@ document.getElementById('formAjout').addEventListener('submit', async (e) => {
   e.preventDefault();
 
   const classe_id = document.getElementById('classe').value;
-  const nom = docum
+  const nom = document.getElementById('nom').value;
+  const ordre = parseInt(document.getElementById('ordre').value);
+  const messageForm = document.getElementById('messageForm');
+
+  let resultat;
+  if (matiereEnEdition) {
+    resultat = await supabaseClient
+      .from('matieres')
+      .update({ classe_id, nom, ordre })
+      .eq('id', matiereEnEdition);
+  } else {
+    resultat = await supabaseClient
+      .from('matieres')
+      .insert({ classe_id, nom, ordre });
+  }
+
+  if (resultat.error) {
+    messageForm.textContent = "Erreur : " + resultat.error.message;
+    return;
+  }
+
+  document.getElementById('formAjout').reset();
+  document.querySelector('#formAjout button[type="submit"]').textContent = '➕ Ajouter';
+  matiereEnEdition = null;
+  messageForm.textContent = '';
+
+  chargerListe();
+});
+
+document.getElementById('filtreClasse').addEventListener('change', chargerListe);
+
+chargerClasses().then(chargerListe);
