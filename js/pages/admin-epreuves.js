@@ -1,9 +1,23 @@
 // Gestion CRUD des épreuves
 
-verifierConnexion();
-
 let epreuveEnEdition = null;
 let toutesLesMatieres = [];
+
+async function initPage() {
+  await verifierConnexion();
+
+  if (!peutAccederType('epreuves')) {
+    document.body.innerHTML = '<p style="padding:40px;text-align:center;color:#dc2626;">Accès non autorisé à ce contenu.</p>';
+    return;
+  }
+
+  if (!peutModifier()) {
+    document.getElementById('formAjout').style.display = 'none';
+    document.querySelector('.admin-contenu').insertAdjacentHTML('afterbegin', '<p style="padding:12px;background:#fef3c7;border-radius:8px;margin-bottom:16px;">🔒 Mode lecture seule : consultation uniquement.</p>');
+  }
+
+  chargerDonneesBase();
+}
 
 async function chargerDonneesBase() {
   const [resClasses, resMatieres] = await Promise.all([
@@ -16,12 +30,14 @@ async function chargerDonneesBase() {
     return;
   }
 
-  toutesLesMatieres = resMatieres.data || [];
+  toutesLesMatieres = (resMatieres.data || []).filter(m => peutAccederClasse(m.classe_id) && peutAccederMatiere(m.id));
+
+  const classesAutorisees = (resClasses.data || []).filter(c => peutAccederClasse(c.id));
 
   const selectClasse = document.getElementById('classe');
   const selectFiltre = document.getElementById('filtreClasse');
 
-  resClasses.data.forEach(classe => {
+  classesAutorisees.forEach(classe => {
     const opt1 = document.createElement('option');
     opt1.value = classe.id;
     opt1.textContent = classe.nom;
@@ -77,32 +93,38 @@ async function chargerListe() {
     return;
   }
 
-  if (data.length === 0) {
+  const donneesAffichees = data.filter(ep => peutAccederClasse(ep.classe_id));
+
+  if (donneesAffichees.length === 0) {
     container.innerHTML = "Aucune épreuve pour l'instant.";
     return;
   }
 
+  const lectureSeule = !peutModifier();
+
   container.innerHTML = '';
-  data.forEach(epreuve => {
+  donneesAffichees.forEach(epreuve => {
     const badgeStatut = epreuve.statut === 'publie' ? '🟢' : '⚪';
+    const boutons = lectureSeule
+      ? ''
+      : `<button class="btn-modifier" data-id="${epreuve.id}">✏️</button><button class="btn-supprimer" data-id="${epreuve.id}">🗑️</button>`;
     const ligne = document.createElement('div');
     ligne.className = 'admin-ligne';
     ligne.innerHTML = `
       <span>${badgeStatut} ${epreuve.titre} <small>(${nomMatiere(epreuve.matiere_id)} - ${nomClasse(epreuve.classe_id)} - ${epreuve.trimestre})</small></span>
-      <div class="admin-ligne-actions">
-        <button class="btn-modifier" data-id="${epreuve.id}">✏️</button>
-        <button class="btn-supprimer" data-id="${epreuve.id}">🗑️</button>
-      </div>
+      <div class="admin-ligne-actions">${boutons}</div>
     `;
     container.appendChild(ligne);
   });
 
-  document.querySelectorAll('.btn-modifier').forEach(btn => {
-    btn.addEventListener('click', () => activerModeEdition(btn.dataset.id, data));
-  });
-  document.querySelectorAll('.btn-supprimer').forEach(btn => {
-    btn.addEventListener('click', () => supprimerEpreuve(btn.dataset.id));
-  });
+  if (!lectureSeule) {
+    document.querySelectorAll('.btn-modifier').forEach(btn => {
+      btn.addEventListener('click', () => activerModeEdition(btn.dataset.id, donneesAffichees));
+    });
+    document.querySelectorAll('.btn-supprimer').forEach(btn => {
+      btn.addEventListener('click', () => supprimerEpreuve(btn.dataset.id));
+    });
+  }
 }
 
 function activerModeEdition(id, liste) {
@@ -144,6 +166,8 @@ async function supprimerEpreuve(id) {
 document.getElementById('formAjout').addEventListener('submit', async (e) => {
   e.preventDefault();
 
+  if (!peutModifier()) return;
+
   const messageForm = document.getElementById('messageForm');
 
   const payload = {
@@ -181,4 +205,4 @@ document.getElementById('formAjout').addEventListener('submit', async (e) => {
 
 document.getElementById('filtreClasse').addEventListener('change', chargerListe);
 
-chargerDonneesBase();
+initPage();
