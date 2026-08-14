@@ -213,3 +213,142 @@ async function chargerListe() {
     const ligne = document.createElement('div');
     ligne.className = 'admin-ligne';
     ligne.innerHTML = `
+      <span>${badgeStatut} ${seance.titre} <small>(${seance.libelle} - ${retrouverContexte(seance)})</small></span>
+      <div class="admin-ligne-actions">
+        <button class="btn-modifier" data-id="${seance.id}">✏️</button>
+        <button class="btn-supprimer" data-id="${seance.id}">🗑️</button>
+      </div>
+    `;
+    container.appendChild(ligne);
+  });
+
+  document.querySelectorAll('.btn-modifier').forEach(btn => {
+    btn.addEventListener('click', () => activerModeEdition(btn.dataset.id, donneesAffichees));
+  });
+  document.querySelectorAll('.btn-supprimer').forEach(btn => {
+    btn.addEventListener('click', () => supprimerSeance(btn.dataset.id));
+  });
+}
+
+function activerModeEdition(id, liste) {
+  const seance = liste.find(s => s.id === id);
+  if (!seance) return;
+
+  const classeId = retrouverClasseId(seance);
+  document.getElementById('classe').value = classeId;
+  remplirMatieres();
+
+  // Retrouve la matière réelle
+  let matiereId = seance.matiere_id;
+  let sousMatiereId = seance.sous_matiere_id;
+  let uniteDossierId = seance.unite_dossier_id;
+
+  if (seance.sa_id) {
+    const sa = toutesLesSA.find(s => s.id === seance.sa_id);
+    uniteDossierId = sa.unite_dossier_id;
+    sousMatiereId = sa.sous_matiere_id;
+    matiereId = sa.matiere_id;
+  }
+
+  if (uniteDossierId) {
+    const ud = tousLesUD.find(u => u.id === uniteDossierId);
+    sousMatiereId = ud.sous_matiere_id;
+    matiereId = ud.sous_matiere_id
+      ? toutesLesSousMatieres.find(s => s.id === ud.sous_matiere_id).matiere_id
+      : ud.matiere_id;
+  } else if (sousMatiereId) {
+    matiereId = toutesLesSousMatieres.find(s => s.id === sousMatiereId).matiere_id;
+  }
+
+  document.getElementById('matiere').value = matiereId;
+  remplirSousMatieres();
+  document.getElementById('sousMatiere').value = sousMatiereId || '';
+  remplirUD();
+  document.getElementById('uniteDossier').value = uniteDossierId || '';
+  remplirSA();
+  document.getElementById('sa').value = seance.sa_id || '';
+
+  document.getElementById('libelle').value = seance.libelle;
+  document.getElementById('titre').value = seance.titre;
+  document.getElementById('objectif').value = seance.objectif || '';
+  document.getElementById('competence').value = seance.competence || '';
+  document.getElementById('prerequis').value = seance.prerequis || '';
+  document.getElementById('introduction').value = seance.introduction || '';
+  document.getElementById('contenu').value = seance.contenu || '';
+  document.getElementById('exemples').value = seance.exemples || '';
+  document.getElementById('resume').value = seance.resume || '';
+  document.getElementById('aRetenir').value = seance.a_retenir || '';
+  document.getElementById('statut').value = seance.statut;
+  document.getElementById('ordre').value = seance.ordre;
+
+  seanceEnEdition = id;
+  document.querySelector('#formAjout button[type="submit"]').textContent = '✏️ Modifier';
+  window.scrollTo({ top: 0, behavior: 'smooth' });
+}
+
+async function supprimerSeance(id) {
+  const confirmation = window.confirm("Supprimer cette séance ? Tout son contenu lié (exercices...) sera aussi supprimé.");
+  if (confirmation !== true) return;
+
+  const { error } = await supabaseClient.from('seances').delete().eq('id', id);
+
+  if (error) {
+    alert("Erreur : " + error.message);
+    return;
+  }
+
+  chargerListe();
+}
+
+document.getElementById('formAjout').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  const matiereId = document.getElementById('matiere').value;
+  const sousMatiereId = document.getElementById('sousMatiere').value;
+  const uniteDossierId = document.getElementById('uniteDossier').value;
+  const saId = document.getElementById('sa').value;
+  const messageForm = document.getElementById('messageForm');
+
+  // Priorité : SA > Unité/Dossier > Sous-matière > Matière
+  const payload = {
+    libelle: document.getElementById('libelle').value,
+    titre: document.getElementById('titre').value,
+    objectif: document.getElementById('objectif').value || null,
+    competence: document.getElementById('competence').value || null,
+    prerequis: document.getElementById('prerequis').value || null,
+    introduction: document.getElementById('introduction').value || null,
+    contenu: document.getElementById('contenu').value || null,
+    exemples: document.getElementById('exemples').value || null,
+    resume: document.getElementById('resume').value || null,
+    a_retenir: document.getElementById('aRetenir').value || null,
+    statut: document.getElementById('statut').value,
+    ordre: parseInt(document.getElementById('ordre').value),
+    sa_id: saId || null,
+    unite_dossier_id: (!saId && uniteDossierId) ? uniteDossierId : null,
+    sous_matiere_id: (!saId && !uniteDossierId && sousMatiereId) ? sousMatiereId : null,
+    matiere_id: (!saId && !uniteDossierId && !sousMatiereId) ? matiereId : null
+  };
+
+  let resultat;
+  if (seanceEnEdition) {
+    resultat = await supabaseClient.from('seances').update(payload).eq('id', seanceEnEdition);
+  } else {
+    resultat = await supabaseClient.from('seances').insert(payload);
+  }
+
+  if (resultat.error) {
+    messageForm.textContent = "Erreur : " + resultat.error.message;
+    return;
+  }
+
+  document.getElementById('formAjout').reset();
+  document.querySelector('#formAjout button[type="submit"]').textContent = '➕ Ajouter';
+  seanceEnEdition = null;
+  messageForm.textContent = '';
+
+  chargerListe();
+});
+
+document.getElementById('filtreClasse').addEventListener('change', chargerListe);
+
+chargerDonneesBase();
