@@ -25,6 +25,7 @@
     <a href="gestion-quiz.html" class="admin-carte">🧠<br>Quiz</a>
     <a href="gestion-epreuves.html" class="admin-carte">📄<br>Épreuves</a>
     <a href="gestion-ressources.html" class="admin-carte">📁<br>Ressources</a>
+    <a href="gestion-administrateurs.html" class="admin-carte" id="carteAdmins" style="display:none;">👑<br>Administrateurs</a>
   </main>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -32,9 +33,14 @@
   <script src="../../js/supabaseClient.js"></script>
   <script src="../../js/auth.js"></script>
   <script>
-    verifierConnexion();
+    async function initDashboard() {
+      await verifierConnexion();
+      if (profilAdmin && profilAdmin.role === 'super_admin') {
+        document.getElementById('carteAdmins').style.display = 'flex';
+      }
+    }
+    initDashboard();
     document.getElementById('btnDeconnexion').addEventListener('click', deconnecter);
   </script>
-
 </body>
 </html>
