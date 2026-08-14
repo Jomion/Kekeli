@@ -1,18 +1,10 @@
 // Gestion CRUD des matières
 
-async function verifierAccesSuperAdmin() {
-  await verifierConnexion();
-  if (profilAdmin.role !== 'super_admin') {
-    document.body.innerHTML = '<p style="padding:40px;text-align:center;color:#dc2626;">Accès réservé au super administrateur.</p>';
-    throw new Error('Accès refusé');
-  }
-}
-verifierAccesSuperAdmin();
+verifierConnexion();
 
 let matiereEnEdition = null;
 let classesDisponibles = [];
 
-// Charge les classes dans les deux menus déroulants (formulaire + filtre)
 async function chargerClasses() {
   const { data, error } = await supabaseClient
     .from('classes')
@@ -42,7 +34,6 @@ async function chargerClasses() {
   });
 }
 
-// Charge et affiche la liste des matières (avec filtre optionnel)
 async function chargerListe() {
   const container = document.getElementById('listeMatieres');
   const filtreId = document.getElementById('filtreClasse').value;
@@ -94,7 +85,10 @@ function activerModeEdition(id, liste) {
   const matiere = liste.find(m => m.id === id);
   if (!matiere) return;
 
-  document.getElementById('classe').value = matiere.classe_id;
+  // En modification, une seule classe est sélectionnée (celle de la matière existante)
+  Array.from(document.getElementById('classe').options).forEach(opt => {
+    opt.selected = (opt.value === matiere.classe_id);
+  });
   document.getElementById('nom').value = matiere.nom;
   document.getElementById('ordre').value = matiere.ordre;
   matiereEnEdition = id;
@@ -120,25 +114,36 @@ async function supprimerMatiere(id) {
 document.getElementById('formAjout').addEventListener('submit', async (e) => {
   e.preventDefault();
 
-  const classe_id = document.getElementById('classe').value;
+  const classesChoisies = Array.from(document.getElementById('classe').selectedOptions).map(opt => opt.value);
   const nom = document.getElementById('nom').value;
   const ordre = parseInt(document.getElementById('ordre').value);
   const messageForm = document.getElementById('messageForm');
 
+  if (classesChoisies.length === 0) {
+    messageForm.textContent = "Sélectionne au moins une classe.";
+    return;
+  }
+
   let resultat;
+
   if (matiereEnEdition) {
+    // En modification, une seule classe (la première sélectionnée)
     resultat = await supabaseClient
       .from('matieres')
-      .update({ classe_id, nom, ordre })
+      .update({ classe_id: classesChoisies[0], nom, ordre })
       .eq('id', matiereEnEdition);
   } else {
-    resultat = await supabaseClient
-      .from('matieres')
-      .insert({ classe_id, nom, ordre });
+    // En ajout, une ligne par classe sélectionnée
+    const lignes = classesChoisies.map(classeId => ({ classe_id: classeId, nom, ordre }));
+    resultat = await supabaseClient.from('matieres').insert(lignes);
   }
 
   if (resultat.error) {
-    messageForm.textContent = "Erreur : " + resultat.error.message;
+    if (resultat.error.code === '23505') {
+      messageForm.textContent = "Cette matière existe déjà pour au moins une des classes sélectionnées.";
+    } else {
+      messageForm.textContent = "Erreur : " + resultat.error.message;
+    }
     return;
   }
 
