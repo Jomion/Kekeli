@@ -1,13 +1,27 @@
 // Gestion CRUD des exercices
 
-verifierConnexion();
-
 let exerciceEnEdition = null;
 let toutesLesMatieres = [];
 let toutesLesSousMatieres = [];
 let tousLesUD = [];
 let toutesLesSA = [];
 let toutesLesSeances = [];
+
+async function initPage() {
+  await verifierConnexion();
+
+  if (!peutAccederType('exercices')) {
+    document.body.innerHTML = '<p style="padding:40px;text-align:center;color:#dc2626;">Accès non autorisé à ce contenu.</p>';
+    return;
+  }
+
+  if (!peutModifier()) {
+    document.getElementById('formAjout').style.display = 'none';
+    document.querySelector('.admin-contenu').insertAdjacentHTML('afterbegin', '<p style="padding:12px;background:#fef3c7;border-radius:8px;margin-bottom:16px;">🔒 Mode lecture seule : consultation uniquement.</p>');
+  }
+
+  chargerDonneesBase();
+}
 
 async function chargerDonneesBase() {
   const [resClasses, resMatieres, resSousMatieres, resUD, resSA, resSeances] = await Promise.all([
@@ -24,16 +38,18 @@ async function chargerDonneesBase() {
     return;
   }
 
-  toutesLesMatieres = resMatieres.data || [];
+  toutesLesMatieres = (resMatieres.data || []).filter(m => peutAccederClasse(m.classe_id) && peutAccederMatiere(m.id));
   toutesLesSousMatieres = resSousMatieres.data || [];
   tousLesUD = resUD.data || [];
   toutesLesSA = resSA.data || [];
   toutesLesSeances = resSeances.data || [];
 
+  const classesAutorisees = (resClasses.data || []).filter(c => peutAccederClasse(c.id));
+
   const selectClasse = document.getElementById('classe');
   const selectFiltre = document.getElementById('filtreClasse');
 
-  resClasses.data.forEach(classe => {
+  classesAutorisees.forEach(classe => {
     const opt1 = document.createElement('option');
     opt1.value = classe.id;
     opt1.textContent = classe.nom;
@@ -159,7 +175,6 @@ document.getElementById('sousMatiere').addEventListener('change', remplirUD);
 document.getElementById('uniteDossier').addEventListener('change', remplirSA);
 document.getElementById('sa').addEventListener('change', remplirSeances);
 
-// Retrouve la matière d'une séance en remontant sa hiérarchie
 function matiereIdDeSeance(seance) {
   function depuisSM(smId) {
     const sm = toutesLesSousMatieres.find(s => s.id === smId);
@@ -212,9 +227,14 @@ async function chargerListe() {
     return;
   }
 
-  let donneesAffichees = data;
+  let donneesAffichees = data.filter(ex => {
+    if (!ex.seance_id) return true; // exercice indépendant, visible par tous
+    const classeId = retrouverClasseId(ex);
+    return classeId && peutAccederClasse(classeId);
+  });
+
   if (filtreClasseId) {
-    donneesAffichees = data.filter(ex => retrouverClasseId(ex) === filtreClasseId);
+    donneesAffichees = donneesAffichees.filter(ex => retrouverClasseId(ex) === filtreClasseId);
   }
 
   if (donneesAffichees.length === 0) {
@@ -222,28 +242,32 @@ async function chargerListe() {
     return;
   }
 
+  const lectureSeule = !peutModifier();
+
   container.innerHTML = '';
   donneesAffichees.forEach(ex => {
     const badgeStatut = ex.statut === 'publie' ? '🟢' : '⚪';
     const titreAffiche = ex.titre || ex.enonce.substring(0, 40) + '...';
+    const boutons = lectureSeule
+      ? ''
+      : `<button class="btn-modifier" data-id="${ex.id}">✏️</button><button class="btn-supprimer" data-id="${ex.id}">🗑️</button>`;
     const ligne = document.createElement('div');
     ligne.className = 'admin-ligne';
     ligne.innerHTML = `
       <span>${badgeStatut} ${titreAffiche} <small>(${ex.type} - ${retrouverContexte(ex)})</small></span>
-      <div class="admin-ligne-actions">
-        <button class="btn-modifier" data-id="${ex.id}">✏️</button>
-        <button class="btn-supprimer" data-id="${ex.id}">🗑️</button>
-      </div>
+      <div class="admin-ligne-actions">${boutons}</div>
     `;
     container.appendChild(ligne);
   });
 
-  document.querySelectorAll('.btn-modifier').forEach(btn => {
-    btn.addEventListener('click', () => activerModeEdition(btn.dataset.id, donneesAffichees));
-  });
-  document.querySelectorAll('.btn-supprimer').forEach(btn => {
-    btn.addEventListener('click', () => supprimerExercice(btn.dataset.id));
-  });
+  if (!lectureSeule) {
+    document.querySelectorAll('.btn-modifier').forEach(btn => {
+      btn.addEventListener('click', () => activerModeEdition(btn.dataset.id, donneesAffichees));
+    });
+    document.querySelectorAll('.btn-supprimer').forEach(btn => {
+      btn.addEventListener('click', () => supprimerExercice(btn.dataset.id));
+    });
+  }
 }
 
 function activerModeEdition(id, liste) {
@@ -304,6 +328,8 @@ async function supprimerExercice(id) {
 document.getElementById('formAjout').addEventListener('submit', async (e) => {
   e.preventDefault();
 
+  if (!peutModifier()) return;
+
   const seanceId = document.getElementById('seance').value;
   const messageForm = document.getElementById('messageForm');
 
@@ -347,4 +373,4 @@ document.getElementById('formAjout').addEventListener('submit', async (e) => {
 
 document.getElementById('filtreClasse').addEventListener('change', chargerListe);
 
-chargerDonneesBase();
+initPage();
