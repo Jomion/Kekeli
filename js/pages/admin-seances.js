@@ -1,12 +1,26 @@
 // Gestion CRUD des séances
 
-verifierConnexion();
-
 let seanceEnEdition = null;
 let toutesLesMatieres = [];
 let toutesLesSousMatieres = [];
 let tousLesUD = [];
 let toutesLesSA = [];
+
+async function initPage() {
+  await verifierConnexion();
+
+  if (!peutAccederType('seances')) {
+    document.body.innerHTML = '<p style="padding:40px;text-align:center;color:#dc2626;">Accès non autorisé à ce contenu.</p>';
+    return;
+  }
+
+  if (!peutModifier()) {
+    document.getElementById('formAjout').style.display = 'none';
+    document.querySelector('.admin-contenu').insertAdjacentHTML('afterbegin', '<p style="padding:12px;background:#fef3c7;border-radius:8px;margin-bottom:16px;">🔒 Mode lecture seule : consultation uniquement.</p>');
+  }
+
+  chargerDonneesBase();
+}
 
 async function chargerDonneesBase() {
   const [resClasses, resMatieres, resSousMatieres, resUD, resSA] = await Promise.all([
@@ -22,15 +36,17 @@ async function chargerDonneesBase() {
     return;
   }
 
-  toutesLesMatieres = resMatieres.data || [];
+  toutesLesMatieres = (resMatieres.data || []).filter(m => peutAccederClasse(m.classe_id) && peutAccederMatiere(m.id));
   toutesLesSousMatieres = resSousMatieres.data || [];
   tousLesUD = resUD.data || [];
   toutesLesSA = resSA.data || [];
 
+  const classesAutorisees = (resClasses.data || []).filter(c => peutAccederClasse(c.id));
+
   const selectClasse = document.getElementById('classe');
   const selectFiltre = document.getElementById('filtreClasse');
 
-  resClasses.data.forEach(classe => {
+  classesAutorisees.forEach(classe => {
     const opt1 = document.createElement('option');
     opt1.value = classe.id;
     opt1.textContent = classe.nom;
@@ -132,7 +148,6 @@ document.getElementById('matiere').addEventListener('change', remplirSousMatiere
 document.getElementById('sousMatiere').addEventListener('change', remplirUD);
 document.getElementById('uniteDossier').addEventListener('change', remplirSA);
 
-// Remonte la hiérarchie complète d'une séance pour retrouver sa classe_id
 function retrouverClasseId(seance) {
   let matiereId = seance.matiere_id;
 
@@ -160,7 +175,7 @@ function retrouverClasseId(seance) {
   }
 
   const matiere = toutesLesMatieres.find(m => m.id === matiereId);
-  return matiere ? matiere.classe_id : null;
+  return matiere ? matiere.classe_id : (window.__toutesMatieresNonFiltrees || []).find(m => m.id === matiereId)?.classe_id || null;
 }
 
 function retrouverContexte(seance) {
@@ -197,9 +212,14 @@ async function chargerListe() {
     return;
   }
 
-  let donneesAffichees = data;
+  // Ne garde que les séances dont la classe est autorisée
+  let donneesAffichees = data.filter(s => {
+    const classeId = retrouverClasseId(s);
+    return classeId && peutAccederClasse(classeId);
+  });
+
   if (filtreClasseId) {
-    donneesAffichees = data.filter(s => retrouverClasseId(s) === filtreClasseId);
+    donneesAffichees = donneesAffichees.filter(s => retrouverClasseId(s) === filtreClasseId);
   }
 
   if (donneesAffichees.length === 0) {
@@ -207,27 +227,31 @@ async function chargerListe() {
     return;
   }
 
+  const lectureSeule = !peutModifier();
+
   container.innerHTML = '';
   donneesAffichees.forEach(seance => {
     const badgeStatut = seance.statut === 'publie' ? '🟢' : '⚪';
+    const boutons = lectureSeule
+      ? ''
+      : `<button class="btn-modifier" data-id="${seance.id}">✏️</button><button class="btn-supprimer" data-id="${seance.id}">🗑️</button>`;
     const ligne = document.createElement('div');
     ligne.className = 'admin-ligne';
     ligne.innerHTML = `
       <span>${badgeStatut} ${seance.libelle === 'seance' ? 'Séance' : 'Séquence'} ${seance.numero || ''} : ${seance.titre} <small>(${retrouverContexte(seance)})</small></span>
-      <div class="admin-ligne-actions">
-        <button class="btn-modifier" data-id="${seance.id}">✏️</button>
-        <button class="btn-supprimer" data-id="${seance.id}">🗑️</button>
-      </div>
+      <div class="admin-ligne-actions">${boutons}</div>
     `;
     container.appendChild(ligne);
   });
 
-  document.querySelectorAll('.btn-modifier').forEach(btn => {
-    btn.addEventListener('click', () => activerModeEdition(btn.dataset.id, donneesAffichees));
-  });
-  document.querySelectorAll('.btn-supprimer').forEach(btn => {
-    btn.addEventListener('click', () => supprimerSeance(btn.dataset.id));
-  });
+  if (!lectureSeule) {
+    document.querySelectorAll('.btn-modifier').forEach(btn => {
+      btn.addEventListener('click', () => activerModeEdition(btn.dataset.id, donneesAffichees));
+    });
+    document.querySelectorAll('.btn-supprimer').forEach(btn => {
+      btn.addEventListener('click', () => supprimerSeance(btn.dataset.id));
+    });
+  }
 }
 
 function activerModeEdition(id, liste) {
@@ -238,7 +262,6 @@ function activerModeEdition(id, liste) {
   document.getElementById('classe').value = classeId;
   remplirMatieres();
 
-  // Retrouve la matière réelle
   let matiereId = seance.matiere_id;
   let sousMatiereId = seance.sous_matiere_id;
   let uniteDossierId = seance.unite_dossier_id;
@@ -279,6 +302,8 @@ function activerModeEdition(id, liste) {
   document.getElementById('exemples').value = seance.exemples || '';
   document.getElementById('resume').value = seance.resume || '';
   document.getElementById('aRetenir').value = seance.a_retenir || '';
+  document.getElementById('attention').value = seance.attention || '';
+  document.getElementById('avertissement').value = seance.avertissement || '';
   document.getElementById('statut').value = seance.statut;
   document.getElementById('ordre').value = seance.ordre;
 
@@ -304,13 +329,14 @@ async function supprimerSeance(id) {
 document.getElementById('formAjout').addEventListener('submit', async (e) => {
   e.preventDefault();
 
+  if (!peutModifier()) return;
+
   const matiereId = document.getElementById('matiere').value;
   const sousMatiereId = document.getElementById('sousMatiere').value;
   const uniteDossierId = document.getElementById('uniteDossier').value;
   const saId = document.getElementById('sa').value;
   const messageForm = document.getElementById('messageForm');
 
-  // Priorité : SA > Unité/Dossier > Sous-matière > Matière
   const payload = {
     libelle: document.getElementById('libelle').value,
     numero: document.getElementById('numero').value ? parseInt(document.getElementById('numero').value) : null,
@@ -323,6 +349,8 @@ document.getElementById('formAjout').addEventListener('submit', async (e) => {
     exemples: document.getElementById('exemples').value || null,
     resume: document.getElementById('resume').value || null,
     a_retenir: document.getElementById('aRetenir').value || null,
+    attention: document.getElementById('attention').value || null,
+    avertissement: document.getElementById('avertissement').value || null,
     statut: document.getElementById('statut').value,
     ordre: parseInt(document.getElementById('ordre').value),
     sa_id: saId || null,
@@ -353,4 +381,4 @@ document.getElementById('formAjout').addEventListener('submit', async (e) => {
 
 document.getElementById('filtreClasse').addEventListener('change', chargerListe);
 
-chargerDonneesBase();
+initPage();
