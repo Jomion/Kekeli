@@ -1,0 +1,87 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestion des épreuves - KEKELI</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/admin.css">
+</head>
+<body>
+
+  <header class="admin-header">
+    <h1>Épreuves</h1>
+    <a href="dashboard.html" class="btn-deconnexion">← Retour</a>
+  </header>
+
+  <main class="admin-contenu">
+
+    <form id="formAjout" class="admin-form admin-form-inline">
+      <label for="classe">Classe</label>
+      <select id="classe" required>
+        <option value="">-- Choisir une classe --</option>
+      </select>
+
+      <label for="matiere">Matière</label>
+      <select id="matiere" required>
+        <option value="">-- Choisir d'abord une classe --</option>
+      </select>
+
+      <label for="titre">Titre</label>
+      <input type="text" id="titre" placeholder="Ex: Composition 2e trimestre" required>
+
+      <label for="trimestre">Trimestre</label>
+      <select id="trimestre" required>
+        <option value="1er trimestre">1er trimestre</option>
+        <option value="2e trimestre">2e trimestre</option>
+        <option value="3e trimestre">3e trimestre</option>
+      </select>
+
+      <label for="anneeScolaire">Année scolaire</label>
+      <input type="text" id="anneeScolaire" placeholder="Ex: 2025-2026" required>
+
+      <label for="typeEpreuve">Type d'épreuve</label>
+      <input type="text" id="typeEpreuve" placeholder="Ex: Composition, Devoir surveillé...">
+
+      <label for="typeRealisation">Réalisation</label>
+      <select id="typeRealisation" required>
+        <option value="pdf">PDF uniquement</option>
+        <option value="en_ligne">En ligne uniquement</option>
+        <option value="les_deux">Les deux</option>
+      </select>
+
+      <label for="fichierPdfUrl">Lien du PDF (si applicable)</label>
+      <input type="url" id="fichierPdfUrl" placeholder="https://...">
+
+      <label for="correctionPdfUrl">Lien du corrigé PDF (si applicable)</label>
+      <input type="url" id="correctionPdfUrl" placeholder="https://...">
+
+      <label for="statut">Statut</label>
+      <select id="statut">
+        <option value="brouillon">Brouillon</option>
+        <option value="publie">Publié</option>
+      </select>
+
+      <button type="submit">➕ Ajouter</button>
+      <p id="messageForm" class="message-erreur"></p>
+    </form>
+
+    <div class="admin-filtre">
+      <label for="filtreClasse">Filtrer par classe :</label>
+      <select id="filtreClasse">
+        <option value="">Toutes les classes</option>
+      </select>
+    </div>
+
+    <div id="listeEpreuves" class="admin-liste">Chargement...</div>
+
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../../js/config.js"></script>
+  <script src="../../js/supabaseClient.js"></script>
+  <script src="../../js/auth.js"></script>
+  <script src="../../js/pages/admin-epreuves.js"></script>
+
+</body>
+</html>
