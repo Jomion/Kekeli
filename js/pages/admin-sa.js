@@ -1,6 +1,13 @@
 // Gestion CRUD des SA
 
-verifierConnexion();
+async function verifierAccesSuperAdmin() {
+  await verifierConnexion();
+  if (profilAdmin.role !== 'super_admin') {
+    document.body.innerHTML = '<p style="padding:40px;text-align:center;color:#dc2626;">Accès réservé au super administrateur.</p>';
+    throw new Error('Accès refusé');
+  }
+}
+verifierAccesSuperAdmin();
 
 let saEnEdition = null;
 let toutesLesMatieres = [];
