@@ -213,7 +213,7 @@ async function chargerListe() {
     const ligne = document.createElement('div');
     ligne.className = 'admin-ligne';
     ligne.innerHTML = `
-      <span>${badgeStatut} ${seance.titre} <small>(${seance.libelle} - ${retrouverContexte(seance)})</small></span>
+      <span>${badgeStatut} ${seance.libelle === 'seance' ? 'Séance' : 'Séquence'} ${seance.numero || ''} : ${seance.titre} <small>(${retrouverContexte(seance)})</small></span>
       <div class="admin-ligne-actions">
         <button class="btn-modifier" data-id="${seance.id}">✏️</button>
         <button class="btn-supprimer" data-id="${seance.id}">🗑️</button>
