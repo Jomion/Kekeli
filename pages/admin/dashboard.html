@@ -14,33 +14,40 @@
     <button class="btn-deconnexion" id="btnDeconnexion">Déconnexion</button>
   </header>
 
-  <main class="admin-cartes">
-    <a href="gestion-classes.html" class="admin-carte">📚<br>Classes</a>
-    <a href="gestion-matieres.html" class="admin-carte">📖<br>Matières</a>
-    <a href="gestion-sous-matieres.html" class="admin-carte">📑<br>Sous-matières</a>
-    <a href="gestion-unites-dossiers.html" class="admin-carte">🗂️<br>Unités/Dossiers</a>
-    <a href="gestion-sa.html" class="admin-carte">📌<br>SA</a>
-    <a href="gestion-seances.html" class="admin-carte">📝<br>Séances</a>
-    <a href="gestion-exercices.html" class="admin-carte">✏️<br>Exercices</a>
-    <a href="gestion-quiz.html" class="admin-carte">🧠<br>Quiz</a>
-    <a href="gestion-epreuves.html" class="admin-carte">📄<br>Épreuves</a>
-    <a href="gestion-ressources.html" class="admin-carte">📁<br>Ressources</a>
+<main class="admin-cartes">
+    <a href="gestion-classes.html" class="admin-carte" id="carteClasses" style="display:none;">📚<br>Classes</a>
+    <a href="gestion-matieres.html" class="admin-carte" id="carteMatieres" style="display:none;">📖<br>Matières</a>
+    <a href="gestion-sous-matieres.html" class="admin-carte" id="carteSousMatieres" style="display:none;">📑<br>Sous-matières</a>
+    <a href="gestion-unites-dossiers.html" class="admin-carte" id="carteUD" style="display:none;">🗂️<br>Unités/Dossiers</a>
+    <a href="gestion-sa.html" class="admin-carte" id="carteSA" style="display:none;">📌<br>SA</a>
+    <a href="gestion-seances.html" class="admin-carte" id="carteSeances" style="display:none;">📝<br>Séances</a>
+    <a href="gestion-exercices.html" class="admin-carte" id="carteExercices" style="display:none;">✏️<br>Exercices</a>
+    <a href="gestion-quiz.html" class="admin-carte" id="carteQuiz" style="display:none;">🧠<br>Quiz</a>
+    <a href="gestion-epreuves.html" class="admin-carte" id="carteEpreuves" style="display:none;">📄<br>Épreuves</a>
+    <a href="gestion-ressources.html" class="admin-carte" id="carteRessources" style="display:none;">📁<br>Ressources</a>
     <a href="gestion-administrateurs.html" class="admin-carte" id="carteAdmins" style="display:none;">👑<br>Administrateurs</a>
   </main>
 
-  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
-  <script src="../../js/config.js"></script>
-  <script src="../../js/supabaseClient.js"></script>
-  <script src="../../js/auth.js"></script>
   <script>
     async function initDashboard() {
       await verifierConnexion();
-      if (profilAdmin && profilAdmin.role === 'super_admin') {
+
+      if (profilAdmin.role === 'super_admin') {
+        document.getElementById('carteClasses').style.display = 'flex';
+        document.getElementById('carteMatieres').style.display = 'flex';
+        document.getElementById('carteSousMatieres').style.display = 'flex';
+        document.getElementById('carteUD').style.display = 'flex';
+        document.getElementById('carteSA').style.display = 'flex';
         document.getElementById('carteAdmins').style.display = 'flex';
       }
+
+      if (peutAccederType('seances')) document.getElementById('carteSeances').style.display = 'flex';
+      if (peutAccederType('exercices')) document.getElementById('carteExercices').style.display = 'flex';
+      if (peutAccederType('quiz')) document.getElementById('carteQuiz').style.display = 'flex';
+      if (peutAccederType('epreuves')) document.getElementById('carteEpreuves').style.display = 'flex';
+      if (peutAccederType('ressources')) document.getElementById('carteRessources').style.display = 'flex';
     }
     initDashboard();
     document.getElementById('btnDeconnexion').addEventListener('click', deconnecter);
-  </script>
-</body>
+  </script></body>
 </html>
