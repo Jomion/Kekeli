@@ -26,8 +26,12 @@
     <a href="gestion-epreuves.html" class="admin-carte" id="carteEpreuves" style="display:none;">📄<br>Épreuves</a>
     <a href="gestion-ressources.html" class="admin-carte" id="carteRessources" style="display:none;">📁<br>Ressources</a>
     <a href="gestion-administrateurs.html" class="admin-carte" id="carteAdmins" style="display:none;">👑<br>Administrateurs</a>
-  </main>
+</main>
 
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../../js/config.js"></script>
+  <script src="../../js/supabaseClient.js"></script>
+  <script src="../../js/auth.js"></script>
   <script>
     async function initDashboard() {
       await verifierConnexion();
