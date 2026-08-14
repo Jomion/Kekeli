@@ -1,10 +1,24 @@
 // Gestion CRUD des ressources
 
-verifierConnexion();
-
 let ressourceEnEdition = null;
 let toutesLesMatieres = [];
 let toutesLesSousMatieres = [];
+
+async function initPage() {
+  await verifierConnexion();
+
+  if (!peutAccederType('ressources')) {
+    document.body.innerHTML = '<p style="padding:40px;text-align:center;color:#dc2626;">Accès non autorisé à ce contenu.</p>';
+    return;
+  }
+
+  if (!peutModifier()) {
+    document.getElementById('formAjout').style.display = 'none';
+    document.querySelector('.admin-contenu').insertAdjacentHTML('afterbegin', '<p style="padding:12px;background:#fef3c7;border-radius:8px;margin-bottom:16px;">🔒 Mode lecture seule : consultation uniquement.</p>');
+  }
+
+  chargerDonneesBase();
+}
 
 async function chargerDonneesBase() {
   const [resClasses, resMatieres, resSousMatieres] = await Promise.all([
@@ -18,13 +32,15 @@ async function chargerDonneesBase() {
     return;
   }
 
-  toutesLesMatieres = resMatieres.data || [];
+  toutesLesMatieres = (resMatieres.data || []).filter(m => peutAccederClasse(m.classe_id) && peutAccederMatiere(m.id));
   toutesLesSousMatieres = resSousMatieres.data || [];
+
+  const classesAutorisees = (resClasses.data || []).filter(c => peutAccederClasse(c.id));
 
   const selectClasse = document.getElementById('classe');
   const selectFiltre = document.getElementById('filtreClasse');
 
-  resClasses.data.forEach(classe => {
+  classesAutorisees.forEach(classe => {
     const opt1 = document.createElement('option');
     opt1.value = classe.id;
     opt1.textContent = classe.nom;
@@ -93,32 +109,39 @@ async function chargerListe() {
     return;
   }
 
-  if (data.length === 0) {
+  // Une ressource sans classe (générale) reste visible par tous ; sinon vérifie la restriction
+  const donneesAffichees = data.filter(r => !r.classe_id || peutAccederClasse(r.classe_id));
+
+  if (donneesAffichees.length === 0) {
     container.innerHTML = "Aucune ressource pour l'instant.";
     return;
   }
 
+  const lectureSeule = !peutModifier();
+
   container.innerHTML = '';
-  data.forEach(ressource => {
+  donneesAffichees.forEach(ressource => {
     const badgeStatut = ressource.statut === 'publie' ? '🟢' : '⚪';
+    const boutons = lectureSeule
+      ? ''
+      : `<button class="btn-modifier" data-id="${ressource.id}">✏️</button><button class="btn-supprimer" data-id="${ressource.id}">🗑️</button>`;
     const ligne = document.createElement('div');
     ligne.className = 'admin-ligne';
     ligne.innerHTML = `
       <span>${badgeStatut} ${ressource.titre} <small>(${ressource.type} - ${nomClasse(ressource.classe_id)})</small></span>
-      <div class="admin-ligne-actions">
-        <button class="btn-modifier" data-id="${ressource.id}">✏️</button>
-        <button class="btn-supprimer" data-id="${ressource.id}">🗑️</button>
-      </div>
+      <div class="admin-ligne-actions">${boutons}</div>
     `;
     container.appendChild(ligne);
   });
 
-  document.querySelectorAll('.btn-modifier').forEach(btn => {
-    btn.addEventListener('click', () => activerModeEdition(btn.dataset.id, data));
-  });
-  document.querySelectorAll('.btn-supprimer').forEach(btn => {
-    btn.addEventListener('click', () => supprimerRessource(btn.dataset.id));
-  });
+  if (!lectureSeule) {
+    document.querySelectorAll('.btn-modifier').forEach(btn => {
+      btn.addEventListener('click', () => activerModeEdition(btn.dataset.id, donneesAffichees));
+    });
+    document.querySelectorAll('.btn-supprimer').forEach(btn => {
+      btn.addEventListener('click', () => supprimerRessource(btn.dataset.id));
+    });
+  }
 }
 
 function activerModeEdition(id, liste) {
@@ -158,6 +181,8 @@ async function supprimerRessource(id) {
 document.getElementById('formAjout').addEventListener('submit', async (e) => {
   e.preventDefault();
 
+  if (!peutModifier()) return;
+
   const messageForm = document.getElementById('messageForm');
 
   const payload = {
@@ -192,4 +217,4 @@ document.getElementById('formAjout').addEventListener('submit', async (e) => {
 
 document.getElementById('filtreClasse').addEventListener('change', chargerListe);
 
-chargerDonneesBase();
+initPage();
