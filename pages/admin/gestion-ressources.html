@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestion des ressources - KEKELI</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/admin.css">
+</head>
+<body>
+
+  <header class="admin-header">
+    <h1>Ressources</h1>
+    <a href="dashboard.html" class="btn-deconnexion">← Retour</a>
+  </header>
+
+  <main class="admin-contenu">
+
+    <form id="formAjout" class="admin-form admin-form-inline">
+      <label for="classe">Classe (facultatif)</label>
+      <select id="classe">
+        <option value="">-- Toutes classes --</option>
+      </select>
+
+      <label for="matiere">Matière (facultatif)</label>
+      <select id="matiere">
+        <option value="">-- Toutes matières --</option>
+      </select>
+
+      <label for="sousMatiere">Sous-matière (facultatif)</label>
+      <select id="sousMatiere">
+        <option value="">-- Aucune --</option>
+      </select>
+
+      <label for="titre">Titre</label>
+      <input type="text" id="titre" placeholder="Ex: Fiche de conjugaison" required>
+
+      <label for="type">Type</label>
+      <select id="type" required>
+        <option value="pdf">PDF</option>
+        <option value="image">Image</option>
+        <option value="fiche">Fiche</option>
+        <option value="document">Document</option>
+        <option value="corrige">Corrigé</option>
+        <option value="autre">Autre</option>
+      </select>
+
+      <label for="url">Lien de la ressource</label>
+      <input type="url" id="url" placeholder="https://..." required>
+
+      <label for="statut">Statut</label>
+      <select id="statut">
+        <option value="brouillon">Brouillon</option>
+        <option value="publie">Publié</option>
+      </select>
+
+      <button type="submit">➕ Ajouter</button>
+      <p id="messageForm" class="message-erreur"></p>
+    </form>
+
+    <div class="admin-filtre">
+      <label for="filtreClasse">Filtrer par classe :</label>
+      <select id="filtreClasse">
+        <option value="">Toutes les classes</option>
+      </select>
+    </div>
+
+    <div id="listeRessources" class="admin-liste">Chargement...</div>
+
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../../js/config.js"></script>
+  <script src="../../js/supabaseClient.js"></script>
+  <script src="../../js/auth.js"></script>
+  <script src="../../js/pages/admin-ressources.js"></script>
+
+</body>
+</html>
