@@ -269,6 +269,7 @@ function activerModeEdition(id, liste) {
   document.getElementById('sa').value = seance.sa_id || '';
 
   document.getElementById('libelle').value = seance.libelle;
+  document.getElementById('numero').value = seance.numero || '';
   document.getElementById('titre').value = seance.titre;
   document.getElementById('objectif').value = seance.objectif || '';
   document.getElementById('competence').value = seance.competence || '';
@@ -312,6 +313,7 @@ document.getElementById('formAjout').addEventListener('submit', async (e) => {
   // Priorité : SA > Unité/Dossier > Sous-matière > Matière
   const payload = {
     libelle: document.getElementById('libelle').value,
+    numero: document.getElementById('numero').value ? parseInt(document.getElementById('numero').value) : null,
     titre: document.getElementById('titre').value,
     objectif: document.getElementById('objectif').value || null,
     competence: document.getElementById('competence').value || null,
