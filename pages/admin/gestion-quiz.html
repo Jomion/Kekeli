@@ -1,0 +1,79 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Gestion des quiz - KEKELI</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/admin.css">
+</head>
+<body>
+
+  <header class="admin-header">
+    <h1>Quiz</h1>
+    <a href="dashboard.html" class="btn-deconnexion">← Retour</a>
+  </header>
+
+  <main class="admin-contenu">
+
+    <form id="formAjout" class="admin-form admin-form-inline">
+      <label for="classe">Classe</label>
+      <select id="classe" required>
+        <option value="">-- Choisir une classe --</option>
+      </select>
+
+      <label for="matiere">Matière (facultatif)</label>
+      <select id="matiere">
+        <option value="">-- Toutes matières --</option>
+      </select>
+
+      <label for="sousMatiere">Sous-matière (facultatif)</label>
+      <select id="sousMatiere">
+        <option value="">-- Aucune --</option>
+      </select>
+
+      <label for="titre">Titre du quiz</label>
+      <input type="text" id="titre" placeholder="Ex: CM2 Français - Révision générale" required>
+
+      <label for="tentativesMax">Nombre de tentatives</label>
+      <input type="number" id="tentativesMax" value="2" required>
+
+      <label class="checkbox-label">
+        <input type="checkbox" id="melangeQuestions">
+        Mélanger l'ordre des questions
+      </label>
+
+      <label class="checkbox-label">
+        <input type="checkbox" id="melangeReponses">
+        Mélanger l'ordre des réponses
+      </label>
+
+      <label for="statut">Statut</label>
+      <select id="statut">
+        <option value="brouillon">Brouillon</option>
+        <option value="publie">Publié</option>
+      </select>
+
+      <button type="submit">➕ Ajouter</button>
+      <p id="messageForm" class="message-erreur"></p>
+    </form>
+
+    <div class="admin-filtre">
+      <label for="filtreClasse">Filtrer par classe :</label>
+      <select id="filtreClasse">
+        <option value="">Toutes les classes</option>
+      </select>
+    </div>
+
+    <div id="listeQuiz" class="admin-liste">Chargement...</div>
+
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../../js/config.js"></script>
+  <script src="../../js/supabaseClient.js"></script>
+  <script src="../../js/auth.js"></script>
+  <script src="../../js/pages/admin-quiz.js"></script>
+
+</body>
+</html>
