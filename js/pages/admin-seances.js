@@ -209,44 +209,27 @@ function retrouverClasseId(seance) {
 }
 
 function retrouverInfos(seance) {
-  const classeId = retrouverClasseId(seance);
+  let sa = seance.sa_id ? toutesLesSA.find(s => s.id === seance.sa_id) : null;
+  let udId = seance.unite_dossier_id || (sa && sa.unite_dossier_id);
+  let ud = udId ? tousLesUD.find(u => u.id === udId) : null;
+  let smId = seance.sous_matiere_id || (sa && sa.sous_matiere_id) || (ud && ud.sous_matiere_id);
+  let sm = smId ? toutesLesSousMatieres.find(s => s.id === smId) : null;
+  let matiereId = seance.matiere_id || (sa && sa.matiere_id) || (ud && ud.matiere_id) || (sm && sm.matiere_id);
+  let matiere = matiereId ? toutesLesMatieres.find(m => m.id === matiereId) : null;
+
+  const classeId = matiere ? matiere.classe_id : null;
   const classeObj = toutesLesClasses.find(c => c.id === classeId);
-  const nomClasse = classeObj ? classeObj.nom : '?';
 
-  let nomMatiere = '?', nomSA = null;
-  if (seance.sa_id) {
-    const sa = toutesLesSA.find(s => s.id === seance.sa_id);
-    nomSA = sa ? sa.nom : '?';
-  }
-
-  const matiereId = (function() {
-    if (seance.sa_id) {
-      const sa = toutesLesSA.find(s => s.id === seance.sa_id);
-      if (sa) {
-        if (sa.unite_dossier_id) {
-          const ud = tousLesUD.find(u => u.id === sa.unite_dossier_id);
-          if (ud && ud.sous_matiere_id) return toutesLesSousMatieres.find(s => s.id === ud.sous_matiere_id)?.matiere_id;
-          if (ud) return ud.matiere_id;
-        }
-        if (sa.sous_matiere_id) return toutesLesSousMatieres.find(s => s.id === sa.sous_matiere_id)?.matiere_id;
-        return sa.matiere_id;
-      }
-    }
-    if (seance.unite_dossier_id) {
-      const ud = tousLesUD.find(u => u.id === seance.unite_dossier_id);
-      if (ud && ud.sous_matiere_id) return toutesLesSousMatieres.find(s => s.id === ud.sous_matiere_id)?.matiere_id;
-      if (ud) return ud.matiere_id;
-    }
-    if (seance.sous_matiere_id) return toutesLesSousMatieres.find(s => s.id === seance.sous_matiere_id)?.matiere_id;
-    return seance.matiere_id;
-  })();
-
-  const m = toutesLesMatieres.find(mm => mm.id === matiereId);
-  nomMatiere = m ? m.nom : '?';
-
-  return { classeId, nomClasse, nomMatiere, nomSA };
+  return {
+    classeId,
+    nomClasse: classeObj ? classeObj.nom : '?',
+    nomMatiere: matiere ? matiere.nom : '?',
+    nomSM: sm ? sm.nom : null,
+    nomUD: ud ? ud.nom : null,
+    semaineUD: ud ? ud.semaine : null,
+    nomSA: sa ? sa.nom : null
+  };
 }
-
 async function chargerListe() {
   const container = document.getElementById('listeSeances');
   const filtreClasseId = document.getElementById('filtreClasse').value;
@@ -278,7 +261,12 @@ async function chargerListe() {
   donneesAffichees.forEach(seance => {
     const badgeStatut = seance.statut === 'publie' ? '🟢' : '⚪';
     const infos = seance.__infos;
-    const contexte = `${infos.nomMatiere} - ${infos.nomClasse}`;
+    const parties = [infos.nomMatiere];
+    if (infos.nomSM) parties.push(infos.nomSM);
+    if (infos.nomUD) parties.push(infos.semaineUD ? `${infos.nomUD} (${infos.semaineUD})` : infos.nomUD);
+    if (infos.nomSA) parties.push(infos.nomSA);
+    parties.push(infos.nomClasse);
+    const contexte = parties.join(' - ');
     const ligne = document.createElement('div');
     ligne.className = 'admin-ligne';
     ligne.innerHTML = `
