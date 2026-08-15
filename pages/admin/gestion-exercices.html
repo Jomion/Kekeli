@@ -17,14 +17,12 @@
   <main class="admin-contenu">
 
     <form id="formAjout" class="admin-form admin-form-inline">
-      <label for="classe">Classe</label>
-      <select id="classe" required>
-        <option value="">-- Choisir une classe --</option>
-      </select>
+      <label for="classe">Classe(s) — Ctrl/Cmd + clic pour plusieurs</label>
+      <select id="classe" multiple size="6" required></select>
 
       <label for="matiere">Matière</label>
       <select id="matiere" required>
-        <option value="">-- Choisir d'abord une classe --</option>
+        <option value="">-- Choisir d'abord une/des classe(s) --</option>
       </select>
 
       <label for="sousMatiere">Sous-matière (si applicable)</label>
@@ -89,7 +87,7 @@
       <label for="statut">Statut</label>
       <select id="statut">
         <option value="brouillon">Brouillon</option>
-        <option value="publie">Publié</option>
+        <option value="en_attente">En attente de validation</option>
       </select>
 
       <label for="ordre">Ordre d'affichage</label>
@@ -99,10 +97,46 @@
       <p id="messageForm" class="message-erreur"></p>
     </form>
 
-    <div class="admin-filtre">
+    <button type="button" id="btnToggleFiltres" class="btn-secondaire" style="margin-bottom:12px;">🔍 Filtres et tri</button>
+
+    <div class="admin-filtre" id="panneauFiltres" style="display:none;">
       <label for="filtreClasse">Filtrer par classe :</label>
       <select id="filtreClasse">
         <option value="">Toutes les classes</option>
+      </select>
+
+      <label for="filtreMatiere">Filtrer par matière :</label>
+      <select id="filtreMatiere">
+        <option value="">Toutes les matières</option>
+      </select>
+
+      <label for="filtreType">Filtrer par type :</label>
+      <select id="filtreType">
+        <option value="">Tous types</option>
+        <option value="qcm">QCM</option>
+        <option value="vrai_faux">Vrai/Faux</option>
+        <option value="reponse_saisie">Réponse à saisir</option>
+        <option value="calcul">Calcul</option>
+        <option value="texte_a_completer">Texte à compléter</option>
+        <option value="association">Association</option>
+        <option value="classement">Classement</option>
+      </select>
+
+      <label for="filtreStatut">Filtrer par statut :</label>
+      <select id="filtreStatut">
+        <option value="">Tous statuts</option>
+        <option value="brouillon">Brouillon</option>
+        <option value="en_attente">En attente</option>
+        <option value="publie">Publié</option>
+      </select>
+
+      <label for="tri">Trier par :</label>
+      <select id="tri">
+        <option value="ordre">Ordre d'affichage</option>
+        <option value="date_desc">Date (plus récent)</option>
+        <option value="date_asc">Date (plus ancien)</option>
+        <option value="admin">Administrateur</option>
+        <option value="statut">Statut</option>
       </select>
     </div>
 
@@ -110,11 +144,13 @@
 
   </main>
 
+  <button id="btnRetourHaut" style="position:fixed;bottom:20px;right:20px;width:50px;height:50px;border-radius:50%;background:var(--bleu-principal);color:white;border:none;font-size:20px;box-shadow:0 2px 8px rgba(0,0,0,0.3);display:none;cursor:pointer;z-index:200;">↑</button>
+
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
   <script src="../../js/config.js"></script>
   <script src="../../js/supabaseClient.js"></script>
   <script src="../../js/auth.js"></script>
-  <script src="../../js/pages/admin-exercices.js"></script>
+  <script src="../../js/pages/admin-exercices.js?v=2"></script>
 
 </body>
 </html>
