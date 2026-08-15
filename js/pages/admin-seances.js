@@ -750,7 +750,14 @@ document.getElementById('btnCreerSA').addEventListener('click', async () => {
   document.getElementById('sa').value = nom;
   if (ignorees.length > 0) alert("Déjà existante pour : " + ignorees.join(', '));
 });
+// ===== Panneau de filtres repliable =====
+document.getElementById('btnToggleFiltres').addEventListener('click', () => {
+  const panneau = document.getElementById('panneauFiltres');
+  panneau.style.display = panneau.style.display === 'none' ? 'flex' : 'none';
+  panneau.style.flexDirection = 'column';
+});
 
+// ===== Bouton retour en haut =====
 // ===== Bouton retour en haut =====
 
 const btnRetourHaut = document.getElementById('btnRetourHaut');
