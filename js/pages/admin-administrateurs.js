@@ -14,16 +14,19 @@ async function initPage() {
 
 let toutesLesClasses = [];
 let toutesLesMatieres = [];
+let tousLesAdmins = [];
 let adminEnEdition = null;
 
 async function chargerDonneesBase() {
-  const [resClasses, resMatieres] = await Promise.all([
+  const [resClasses, resMatieres, resAdmins] = await Promise.all([
     supabaseClient.from('classes').select('*').order('ordre', { ascending: true }),
-    supabaseClient.from('matieres').select('*, classes(nom)').order('nom', { ascending: true })
+    supabaseClient.from('matieres').select('*, classes(nom)').order('nom', { ascending: true }),
+    supabaseClient.from('administrateurs').select('*').order('created_at', { ascending: true })
   ]);
 
   toutesLesClasses = resClasses.data || [];
   toutesLesMatieres = resMatieres.data || [];
+  tousLesAdmins = resAdmins.data || [];
 
   const selectClasses = document.getElementById('classesAutorisees');
   toutesLesClasses.forEach(c => {
@@ -39,6 +42,14 @@ async function chargerDonneesBase() {
     opt.value = m.id;
     opt.textContent = `${m.nom} (${m.classes ? m.classes.nom : '?'})`;
     selectMatieres.appendChild(opt);
+  });
+
+  const selectControleur = document.getElementById('controleur');
+  tousLesAdmins.forEach(a => {
+    const opt = document.createElement('option');
+    opt.value = a.id;
+    opt.textContent = `${a.nom} (${a.email})`;
+    selectControleur.appendChild(opt);
   });
 
   chargerListe();
@@ -59,26 +70,28 @@ function definirValeursSelectionnees(selectId, valeurs) {
 async function chargerListe() {
   const container = document.getElementById('listeAdmins');
 
-  const { data, error } = await supabaseClient
-    .from('administrateurs')
-    .select('*')
-    .order('created_at', { ascending: true });
-
-  if (error) {
-    container.innerHTML = "Erreur : " + error.message;
-    return;
-  }
+  const { data: liensControleurs } = await supabaseClient.from('administrateur_controleur').select('*');
 
   container.innerHTML = '';
-  data.forEach(admin => {
+  tousLesAdmins.forEach(admin => {
     const badgeRole = admin.role === 'super_admin' ? '👑 Super admin' : '👤 Admin';
     const badgeActif = admin.actif ? '🟢' : '🔴';
     const badgeLecture = admin.lecture_seule ? ' (lecture seule)' : '';
 
+    const lien = (liensControleurs || []).find(l => l.administrateur_id === admin.id);
+    let nomControleur = 'lui-même';
+    if (lien) {
+      const c = tousLesAdmins.find(a => a.id === lien.controleur_id);
+      nomControleur = c ? c.nom : '?';
+    } else if (admin.role !== 'super_admin') {
+      const sa = tousLesAdmins.find(a => a.role === 'super_admin');
+      nomControleur = sa ? `${sa.nom} (défaut)` : '?';
+    }
+
     const ligne = document.createElement('div');
     ligne.className = 'admin-ligne';
     ligne.innerHTML = `
-      <span>${badgeActif} ${admin.nom} <small>(${admin.email} - ${badgeRole}${badgeLecture})</small></span>
+      <span>${badgeActif} ${admin.nom} <small>(${admin.email} - ${badgeRole}${badgeLecture} - contrôleur: ${nomControleur})</small></span>
       <div class="admin-ligne-actions">
         <button class="btn-modifier" data-id="${admin.id}">✏️</button>
         <button class="btn-supprimer" data-id="${admin.id}">🗑️</button>
@@ -88,21 +101,22 @@ async function chargerListe() {
   });
 
   document.querySelectorAll('.btn-modifier').forEach(btn => {
-    btn.addEventListener('click', () => activerModeEdition(btn.dataset.id, data));
+    btn.addEventListener('click', () => activerModeEdition(btn.dataset.id));
   });
   document.querySelectorAll('.btn-supprimer').forEach(btn => {
     btn.addEventListener('click', () => supprimerAdmin(btn.dataset.id));
   });
 }
 
-async function activerModeEdition(id, liste) {
-  const admin = liste.find(a => a.id === id);
+async function activerModeEdition(id) {
+  const admin = tousLesAdmins.find(a => a.id === id);
   if (!admin) return;
 
-  const [resClasses, resMatieres, resTypes] = await Promise.all([
+  const [resClasses, resMatieres, resTypes, resControleur] = await Promise.all([
     supabaseClient.from('administrateur_classes').select('classe_id').eq('administrateur_id', id),
     supabaseClient.from('administrateur_matieres').select('matiere_id').eq('administrateur_id', id),
-    supabaseClient.from('administrateur_types_contenu').select('type_contenu').eq('administrateur_id', id)
+    supabaseClient.from('administrateur_types_contenu').select('type_contenu').eq('administrateur_id', id),
+    supabaseClient.from('administrateur_controleur').select('controleur_id').eq('administrateur_id', id).maybeSingle()
   ]);
 
   document.getElementById('uid').value = admin.id;
@@ -112,6 +126,7 @@ async function activerModeEdition(id, liste) {
   document.getElementById('role').value = admin.role;
   document.getElementById('lectureSeule').checked = admin.lecture_seule;
   document.getElementById('actif').checked = admin.actif;
+  document.getElementById('controleur').value = resControleur.data ? resControleur.data.controleur_id : '';
 
   definirValeursSelectionnees('classesAutorisees', (resClasses.data || []).map(c => c.classe_id));
   definirValeursSelectionnees('matieresAutorisees', (resMatieres.data || []).map(m => m.matiere_id));
@@ -138,7 +153,7 @@ async function supprimerAdmin(id) {
     return;
   }
 
-  chargerListe();
+  chargerDonneesBase();
 }
 
 document.getElementById('formAjout').addEventListener('submit', async (e) => {
@@ -146,6 +161,7 @@ document.getElementById('formAjout').addEventListener('submit', async (e) => {
 
   const messageForm = document.getElementById('messageForm');
   const uid = document.getElementById('uid').value.trim();
+  const controleurId = document.getElementById('controleur').value;
 
   const payloadAdmin = {
     id: uid,
@@ -168,10 +184,10 @@ document.getElementById('formAjout').addEventListener('submit', async (e) => {
     return;
   }
 
-  // Met à jour les restrictions : on supprime les anciennes puis on réinsère
   await supabaseClient.from('administrateur_classes').delete().eq('administrateur_id', uid);
   await supabaseClient.from('administrateur_matieres').delete().eq('administrateur_id', uid);
   await supabaseClient.from('administrateur_types_contenu').delete().eq('administrateur_id', uid);
+  await supabaseClient.from('administrateur_controleur').delete().eq('administrateur_id', uid);
 
   const classesChoisies = valeursSelectionnees('classesAutorisees');
   const matieresChoisies = valeursSelectionnees('matieresAutorisees');
@@ -192,6 +208,9 @@ document.getElementById('formAjout').addEventListener('submit', async (e) => {
       typesChoisis.map(type => ({ administrateur_id: uid, type_contenu: type }))
     );
   }
+  if (controleurId) {
+    await supabaseClient.from('administrateur_controleur').insert({ administrateur_id: uid, controleur_id: controleurId });
+  }
 
   document.getElementById('formAjout').reset();
   document.getElementById('uid').readOnly = false;
@@ -199,7 +218,7 @@ document.getElementById('formAjout').addEventListener('submit', async (e) => {
   adminEnEdition = null;
   messageForm.textContent = '';
 
-  chargerListe();
+  chargerDonneesBase();
 });
 
 initPage();
