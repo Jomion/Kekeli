@@ -1,7 +1,5 @@
 // Gestion CRUD des matières
 
-verifierConnexion();
-
 let matiereEnEdition = null;
 let classesDisponibles = [];
 
@@ -157,4 +155,12 @@ document.getElementById('formAjout').addEventListener('submit', async (e) => {
 
 document.getElementById('filtreClasse').addEventListener('change', chargerListe);
 
-chargerClasses().then(chargerListe);
+async function initPage() {
+  await verifierConnexion();
+  if (!profilAdmin || profilAdmin.role !== 'super_admin') {
+    document.body.innerHTML = '<p style="padding:40px;text-align:center;color:#dc2626;">Accès réservé au super administrateur.</p>';
+    return;
+  }
+  chargerClasses().then(chargerListe);
+}
+initPage();
