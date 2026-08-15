@@ -51,6 +51,29 @@ async function verifierConnexion() {
 
   profilAdmin = admin;
 
+  profilAdmin = admin;
+
+  // Détermine le contrôleur de cet admin (lui-même, un autre admin désigné, ou le super_admin par défaut)
+  const { data: lienControleur } = await supabaseClient
+    .from('administrateur_controleur')
+    .select('controleur_id')
+    .eq('administrateur_id', admin.id)
+    .maybeSingle();
+
+  if (lienControleur) {
+    profilAdmin.controleurId = lienControleur.controleur_id;
+  } else if (admin.role === 'super_admin') {
+    profilAdmin.controleurId = admin.id;
+  } else {
+    const { data: superAdmin } = await supabaseClient
+      .from('administrateurs')
+      .select('id')
+      .eq('role', 'super_admin')
+      .limit(1)
+      .maybeSingle();
+    profilAdmin.controleurId = superAdmin ? superAdmin.id : null;
+  }
+
   // Charge les restrictions (classes, matières, types de contenu autorisés)
   const [resClasses, resMatieres, resTypes] = await Promise.all([
     supabaseClient.from('administrateur_classes').select('classe_id').eq('administrateur_id', admin.id),
@@ -94,6 +117,12 @@ function peutModifier() {
   return !profilAdmin.lecture_seule;
 }
 
+// Vérifie si l'admin actuel est habilité à valider des contenus (le sien ou en tant que contrôleur désigné)
+function peutValider() {
+  if (!profilAdmin) return false;
+  if (profilAdmin.role === 'super_admin') return true;
+  return profilAdmin.controleurId === profilAdmin.id;
+}
 // Déconnexion
 async function deconnecter() {
   await supabaseClient.auth.signOut();
