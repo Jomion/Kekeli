@@ -213,6 +213,36 @@ function remplirFiltreSousMatiere() {
     opt.textContent = nom;
     selectFiltre.appendChild(opt);
   });
+  remplirFiltreUD();
+}
+
+function remplirFiltreUD() {
+  const classeId = document.getElementById('filtreClasse').value;
+  const nomMatiere = document.getElementById('filtreMatiere').value;
+  const nomSM = document.getElementById('filtreSousMatiere').value;
+  const selectFiltre = document.getElementById('filtreUD');
+  selectFiltre.innerHTML = '<option value="">Tous</option>';
+
+  let matieresFiltrees = classeId ? toutesLesMatieres.filter(m => m.classe_id === classeId) : toutesLesMatieres;
+  if (nomMatiere) matieresFiltrees = matieresFiltrees.filter(m => m.nom === nomMatiere);
+  const idsMatieres = matieresFiltrees.map(m => m.id);
+
+  let source;
+  if (nomSM) {
+    const idsSM = toutesLesSousMatieres.filter(sm => idsMatieres.includes(sm.matiere_id) && sm.nom === nomSM).map(sm => sm.id);
+    source = tousLesUD.filter(ud => idsSM.includes(ud.sous_matiere_id));
+  } else {
+    const idsSM = toutesLesSousMatieres.filter(sm => idsMatieres.includes(sm.matiere_id)).map(sm => sm.id);
+    source = tousLesUD.filter(ud => idsMatieres.includes(ud.matiere_id) || idsSM.includes(ud.sous_matiere_id));
+  }
+
+  const noms = [...new Set(source.map(ud => ud.nom))].sort();
+  noms.forEach(nom => {
+    const opt = document.createElement('option');
+    opt.value = nom;
+    opt.textContent = nom;
+    selectFiltre.appendChild(opt);
+  });
   remplirFiltreSA();
 }
 
@@ -230,7 +260,9 @@ function remplirFiltreSA() {
 
 document.getElementById('filtreClasse').addEventListener('change', () => { remplirFiltreMatiere(); chargerListe(); });
 document.getElementById('filtreMatiere').addEventListener('change', () => { remplirFiltreSousMatiere(); chargerListe(); });
-document.getElementById('filtreSousMatiere').addEventListener('change', chargerListe);
+document.getElementById('filtreSousMatiere').addEventListener('change', () => { remplirFiltreUD(); chargerListe(); });
+document.getElementById('filtreUD').addEventListener('change', () => { remplirFiltreSA(); chargerListe(); });
+document.getElementById('filtreSemaine').addEventListener('change', chargerListe);
 document.getElementById('filtreSA').addEventListener('change', chargerListe);
 document.getElementById('filtreStatut').addEventListener('change', chargerListe);
 document.getElementById('tri').addEventListener('change', chargerListe);
@@ -268,6 +300,8 @@ async function chargerListe() {
   const filtreClasseId = document.getElementById('filtreClasse').value;
   const filtreMatiereNom = document.getElementById('filtreMatiere').value;
   const filtreSMNom = document.getElementById('filtreSousMatiere').value;
+  const filtreUDNom = document.getElementById('filtreUD').value;
+  const filtreSemaineVal = document.getElementById('filtreSemaine').value;
   const filtreSANom = document.getElementById('filtreSA').value;
   const filtreStatutVal = document.getElementById('filtreStatut').value;
   const triVal = document.getElementById('tri').value;
@@ -292,6 +326,8 @@ async function chargerListe() {
   if (filtreClasseId) donneesAffichees = donneesAffichees.filter(s => s.__infos.classeId === filtreClasseId);
   if (filtreMatiereNom) donneesAffichees = donneesAffichees.filter(s => s.__infos.nomMatiere === filtreMatiereNom);
   if (filtreSMNom) donneesAffichees = donneesAffichees.filter(s => s.__infos.nomSM === filtreSMNom);
+  if (filtreUDNom) donneesAffichees = donneesAffichees.filter(s => s.__infos.nomUD === filtreUDNom);
+  if (filtreSemaineVal) donneesAffichees = donneesAffichees.filter(s => s.__infos.semaineUD === filtreSemaineVal);
   if (filtreSANom) donneesAffichees = donneesAffichees.filter(s => s.__infos.nomSA === filtreSANom);
   if (filtreStatutVal) donneesAffichees = donneesAffichees.filter(s => s.statut === filtreStatutVal);
 
@@ -481,7 +517,6 @@ function resoudreCibleSeance(classeId, nomMatiere, nomSM, nomUD, nomSA) {
   return { sa_id: null, unite_dossier_id: null, sous_matiere_id: null, matiere_id: matiere.id };
 }
 
-// Vérifie si une séance avec le même rattachement + libellé + numéro existe déjà (hors celle en édition)
 function existeDejaSequence(cible, libelle, numero, idAExclure) {
   return toutesLesSeances.some(s => {
     if (idAExclure && s.id === idAExclure) return false;
@@ -750,14 +785,15 @@ document.getElementById('btnCreerSA').addEventListener('click', async () => {
   document.getElementById('sa').value = nom;
   if (ignorees.length > 0) alert("Déjà existante pour : " + ignorees.join(', '));
 });
+
 // ===== Panneau de filtres repliable =====
+
 document.getElementById('btnToggleFiltres').addEventListener('click', () => {
   const panneau = document.getElementById('panneauFiltres');
   panneau.style.display = panneau.style.display === 'none' ? 'flex' : 'none';
   panneau.style.flexDirection = 'column';
 });
 
-// ===== Bouton retour en haut =====
 // ===== Bouton retour en haut =====
 
 const btnRetourHaut = document.getElementById('btnRetourHaut');
