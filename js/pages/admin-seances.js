@@ -25,7 +25,8 @@ async function chargerDonneesBase() {
   }
 
   toutesLesClasses = resClasses.data.filter(c => peutAccederClasse(c.id));
-  toutesLesMatieres = (resMatieres.data || []).filter(m => peutAccederClasse(m.classe_id) && peutAccederMatiere(m.id));  toutesLesSousMatieres = resSousMatieres.data || [];
+  toutesLesMatieres = (resMatieres.data || []).filter(m => peutAccederClasse(m.classe_id) && peutAccederMatiere(m.id));
+  toutesLesSousMatieres = resSousMatieres.data || [];
   tousLesUD = resUD.data || [];
   toutesLesSA = resSA.data || [];
   tousLesAdmins = resAdmins.data || [];
@@ -341,6 +342,7 @@ async function chargerListe() {
   }
 
   const badgesStatut = { brouillon: '⚪ Brouillon', en_attente: '🟡 En attente', publie: '🟢 Publié' };
+  const lectureSeule = !peutModifier();
 
   container.innerHTML = '';
   donneesAffichees.forEach(seance => {
@@ -363,9 +365,9 @@ async function chargerListe() {
     const dateAffichee = dateObj.toLocaleDateString('fr-FR') + ' à ' + dateObj.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
     const infosSoumission = `${dateAffichee} - ${nomAdmin(seance.cree_par)} - ${badgesStatut[seance.statut] || seance.statut}`;
 
-    const boutons = peutModifier()
-      ? `<button class="btn-modifier" data-id="${seance.id}">✏️</button><button class="btn-supprimer" data-id="${seance.id}">🗑️</button>`
-      : '';
+    const boutons = lectureSeule
+      ? ''
+      : `<button class="btn-modifier" data-id="${seance.id}">✏️</button><button class="btn-supprimer" data-id="${seance.id}">🗑️</button>`;
 
     const ligne = document.createElement('div');
     ligne.className = 'admin-ligne';
@@ -381,7 +383,7 @@ async function chargerListe() {
     container.appendChild(ligne);
   });
 
-  if (peutModifier()) {
+  if (!lectureSeule) {
     document.querySelectorAll('.btn-modifier').forEach(btn => {
       btn.addEventListener('click', () => activerModeEdition(btn.dataset.id, donneesAffichees));
     });
@@ -389,14 +391,6 @@ async function chargerListe() {
       btn.addEventListener('click', () => supprimerSeance(btn.dataset.id));
     });
   }
-}
-
-  document.querySelectorAll('.btn-modifier').forEach(btn => {
-    btn.addEventListener('click', () => activerModeEdition(btn.dataset.id, donneesAffichees));
-  });
-  document.querySelectorAll('.btn-supprimer').forEach(btn => {
-    btn.addEventListener('click', () => supprimerSeance(btn.dataset.id));
-  });
 }
 
 function activerModeEdition(id, liste) {
@@ -540,6 +534,8 @@ function existeDejaSequence(cible, libelle, numero, idAExclure) {
 
 document.getElementById('formAjout').addEventListener('submit', async (e) => {
   e.preventDefault();
+
+  if (!peutModifier()) return;
 
   const classesChoisies = Array.from(document.getElementById('classe').selectedOptions).map(o => o.value);
   const nomMatiere = document.getElementById('matiere').value;
@@ -812,6 +808,8 @@ window.addEventListener('scroll', () => {
 btnRetourHaut.addEventListener('click', () => {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 });
+
+// ===== Initialisation avec vérification des permissions =====
 
 async function initPage() {
   await verifierConnexion();
