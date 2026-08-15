@@ -1,7 +1,6 @@
 // Gestion CRUD des séances
 
 let seanceEnEdition = null;
-let seanceEnEdition = null;
 let toutesLesClasses = [];
 let toutesLesMatieres = [];
 let toutesLesSousMatieres = [];
