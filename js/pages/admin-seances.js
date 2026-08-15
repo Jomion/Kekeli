@@ -1,7 +1,6 @@
 // Gestion CRUD des séances
 
-verifierConnexion();
-
+let seanceEnEdition = null;
 let seanceEnEdition = null;
 let toutesLesClasses = [];
 let toutesLesMatieres = [];
@@ -26,9 +25,8 @@ async function chargerDonneesBase() {
     return;
   }
 
-  toutesLesClasses = resClasses.data;
-  toutesLesMatieres = resMatieres.data || [];
-  toutesLesSousMatieres = resSousMatieres.data || [];
+  toutesLesClasses = resClasses.data.filter(c => peutAccederClasse(c.id));
+  toutesLesMatieres = (resMatieres.data || []).filter(m => peutAccederClasse(m.classe_id) && peutAccederMatiere(m.id));  toutesLesSousMatieres = resSousMatieres.data || [];
   tousLesUD = resUD.data || [];
   toutesLesSA = resSA.data || [];
   tousLesAdmins = resAdmins.data || [];
@@ -321,7 +319,8 @@ async function chargerListe() {
 
   toutesLesSeances = data;
 
-  let donneesAffichees = data.map(s => ({ ...s, __infos: retrouverInfos(s) }));
+  let donneesAffichees = data.map(s => ({ ...s, __infos: retrouverInfos(s) }))
+    .filter(s => s.__infos.classeId && peutAccederClasse(s.__infos.classeId));
 
   if (filtreClasseId) donneesAffichees = donneesAffichees.filter(s => s.__infos.classeId === filtreClasseId);
   if (filtreMatiereNom) donneesAffichees = donneesAffichees.filter(s => s.__infos.nomMatiere === filtreMatiereNom);
@@ -365,6 +364,10 @@ async function chargerListe() {
     const dateAffichee = dateObj.toLocaleDateString('fr-FR') + ' à ' + dateObj.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
     const infosSoumission = `${dateAffichee} - ${nomAdmin(seance.cree_par)} - ${badgesStatut[seance.statut] || seance.statut}`;
 
+    const boutons = peutModifier()
+      ? `<button class="btn-modifier" data-id="${seance.id}">✏️</button><button class="btn-supprimer" data-id="${seance.id}">🗑️</button>`
+      : '';
+
     const ligne = document.createElement('div');
     ligne.className = 'admin-ligne';
     ligne.style.flexDirection = 'column';
@@ -372,15 +375,22 @@ async function chargerListe() {
     ligne.innerHTML = `
       <div style="display:flex;justify-content:space-between;align-items:center;">
         <span><strong>${principal}</strong> <small>(${contexte})</small></span>
-        <div class="admin-ligne-actions">
-          <button class="btn-modifier" data-id="${seance.id}">✏️</button>
-          <button class="btn-supprimer" data-id="${seance.id}">🗑️</button>
-        </div>
+        <div class="admin-ligne-actions">${boutons}</div>
       </div>
       <div style="font-size:12px;color:var(--texte-gris);margin-top:4px;">${infosSoumission}</div>
     `;
     container.appendChild(ligne);
   });
+
+  if (peutModifier()) {
+    document.querySelectorAll('.btn-modifier').forEach(btn => {
+      btn.addEventListener('click', () => activerModeEdition(btn.dataset.id, donneesAffichees));
+    });
+    document.querySelectorAll('.btn-supprimer').forEach(btn => {
+      btn.addEventListener('click', () => supprimerSeance(btn.dataset.id));
+    });
+  }
+}
 
   document.querySelectorAll('.btn-modifier').forEach(btn => {
     btn.addEventListener('click', () => activerModeEdition(btn.dataset.id, donneesAffichees));
@@ -804,4 +814,20 @@ btnRetourHaut.addEventListener('click', () => {
   window.scrollTo({ top: 0, behavior: 'smooth' });
 });
 
-chargerDonneesBase();
+async function initPage() {
+  await verifierConnexion();
+
+  if (!peutAccederType('seances')) {
+    document.body.innerHTML = '<p style="padding:40px;text-align:center;color:#dc2626;">Accès non autorisé à ce contenu.</p>';
+    return;
+  }
+
+  if (!peutModifier()) {
+    document.getElementById('formAjout').style.display = 'none';
+    document.querySelector('.admin-contenu').insertAdjacentHTML('afterbegin', '<p style="padding:12px;background:#fef3c7;border-radius:8px;margin-bottom:16px;">🔒 Mode lecture seule : consultation uniquement.</p>');
+  }
+
+  chargerDonneesBase();
+}
+
+initPage();
