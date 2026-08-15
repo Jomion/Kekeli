@@ -52,7 +52,14 @@ async function chargerDonneesBase() {
     opt.textContent = nom;
     selectFiltreMatiere.appendChild(opt);
   });
-
+  const nomsSMUniques = [...new Set(toutesLesSousMatieres.map(sm => sm.nom))].sort();
+  const selectFiltreSM = document.getElementById('filtreSousMatiere');
+  nomsSMUniques.forEach(nom => {
+    const opt = document.createElement('option');
+    opt.value = nom;
+    opt.textContent = nom;
+    selectFiltreSM.appendChild(opt);
+  });
   const nomsSAUniques = [...new Set(toutesLesSA.map(sa => sa.nom))].sort();
   const selectFiltreSA = document.getElementById('filtreSA');
   nomsSAUniques.forEach(nom => {
@@ -234,8 +241,8 @@ async function chargerListe() {
   const container = document.getElementById('listeSeances');
   const filtreClasseId = document.getElementById('filtreClasse').value;
   const filtreMatiereNom = document.getElementById('filtreMatiere').value;
+  const filtreSMNom = document.getElementById('filtreSousMatiere').value;
   const filtreSANom = document.getElementById('filtreSA').value;
-
   const { data, error } = await supabaseClient
     .from('seances')
     .select('*')
@@ -250,8 +257,8 @@ async function chargerListe() {
 
   if (filtreClasseId) donneesAffichees = donneesAffichees.filter(s => s.__infos.classeId === filtreClasseId);
   if (filtreMatiereNom) donneesAffichees = donneesAffichees.filter(s => s.__infos.nomMatiere === filtreMatiereNom);
+  if (filtreSMNom) donneesAffichees = donneesAffichees.filter(s => s.__infos.nomSM === filtreSMNom);
   if (filtreSANom) donneesAffichees = donneesAffichees.filter(s => s.__infos.nomSA === filtreSANom);
-
   if (donneesAffichees.length === 0) {
     container.innerHTML = "Aucune séance pour l'instant.";
     return;
@@ -261,7 +268,8 @@ async function chargerListe() {
   donneesAffichees.forEach(seance => {
     const badgeStatut = seance.statut === 'publie' ? '🟢' : '⚪';
     const infos = seance.__infos;
-    const parties = [infos.nomMatiere];
+    const libelleAffiche = `${seance.libelle === 'seance' ? 'Séance' : 'Séquence'} ${seance.numero || ''}`.trim();
+    const parties = [libelleAffiche, infos.nomMatiere];
     if (infos.nomSM) parties.push(infos.nomSM);
     if (infos.nomUD) parties.push(infos.semaineUD ? `${infos.nomUD} (${infos.semaineUD})` : infos.nomUD);
     if (infos.nomSA) parties.push(infos.nomSA);
@@ -270,7 +278,7 @@ async function chargerListe() {
     const ligne = document.createElement('div');
     ligne.className = 'admin-ligne';
     ligne.innerHTML = `
-      <span>${badgeStatut} ${seance.libelle === 'seance' ? 'Séance' : 'Séquence'} ${seance.numero || ''} : ${seance.titre} <small>(${contexte})</small></span>
+      <span>${badgeStatut} ${seance.titre} <small>(${contexte})</small></span>
       <div class="admin-ligne-actions">
         <button class="btn-modifier" data-id="${seance.id}">✏️</button>
         <button class="btn-supprimer" data-id="${seance.id}">🗑️</button>
@@ -499,8 +507,8 @@ document.getElementById('formAjout').addEventListener('submit', async (e) => {
 
 document.getElementById('filtreClasse').addEventListener('change', chargerListe);
 document.getElementById('filtreMatiere').addEventListener('change', chargerListe);
+document.getElementById('filtreSousMatiere').addEventListener('change', chargerListe);
 document.getElementById('filtreSA').addEventListener('change', chargerListe);
-
 // ===== Création rapide sans quitter la page =====
 
 document.getElementById('btnCreerMatiere').addEventListener('click', async () => {
