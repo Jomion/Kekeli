@@ -88,8 +88,8 @@ function activerModeEdition(id, liste) {
     opt.selected = (opt.value === matiere.classe_id);
   });
   document.getElementById('nom').value = matiere.nom;
-  document.getElementById('ordre').value = matiere.ordre;
-  matiereEnEdition = id;
+  document.getElementById('nomComplet').value = matiere.nom_complet || '';
+  document.getElementById('ordre').value = matiere.ordre;  matiereEnEdition = id;
 
   document.querySelector('#formAjout button[type="submit"]').textContent = '✏️ Modifier';
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -114,8 +114,8 @@ document.getElementById('formAjout').addEventListener('submit', async (e) => {
 
   const classesChoisies = Array.from(document.getElementById('classe').selectedOptions).map(opt => opt.value);
   const nom = document.getElementById('nom').value;
-  const ordre = parseInt(document.getElementById('ordre').value);
-  const messageForm = document.getElementById('messageForm');
+  const nomComplet = document.getElementById('nomComplet').value || null;
+  const ordre = parseInt(document.getElementById('ordre').value);  const messageForm = document.getElementById('messageForm');
 
   if (classesChoisies.length === 0) {
     messageForm.textContent = "Sélectionne au moins une classe.";
@@ -125,14 +125,12 @@ document.getElementById('formAjout').addEventListener('submit', async (e) => {
   let resultat;
 
   if (matiereEnEdition) {
-    // En modification, une seule classe (la première sélectionnée)
     resultat = await supabaseClient
       .from('matieres')
-      .update({ classe_id: classesChoisies[0], nom, ordre })
+      .update({ classe_id: classesChoisies[0], nom, nom_complet: nomComplet, ordre })
       .eq('id', matiereEnEdition);
   } else {
-    // En ajout, une ligne par classe sélectionnée
-    const lignes = classesChoisies.map(classeId => ({ classe_id: classeId, nom, ordre }));
+    const lignes = classesChoisies.map(classeId => ({ classe_id: classeId, nom, nom_complet: nomComplet, ordre }));
     resultat = await supabaseClient.from('matieres').insert(lignes);
   }
 
