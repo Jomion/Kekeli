@@ -49,7 +49,7 @@ async function chargerMatieres() {
     const carte = document.createElement('a');
     carte.href = `matiere.html?id=${matiere.id}`;
     carte.className = 'carte-classe';
-    carte.textContent = matiere.nom;
+    carte.textContent = matiere.nom_complet || matiere.nom;
     grille.appendChild(carte);
   });
 }
