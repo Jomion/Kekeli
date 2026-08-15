@@ -501,4 +501,198 @@ document.getElementById('filtreClasse').addEventListener('change', chargerListe)
 document.getElementById('filtreMatiere').addEventListener('change', chargerListe);
 document.getElementById('filtreSA').addEventListener('change', chargerListe);
 
+// ===== Création rapide sans quitter la page =====
+
+document.getElementById('btnCreerMatiere').addEventListener('click', async () => {
+  const classesChoisies = Array.from(document.getElementById('classe').selectedOptions).map(o => o.value);
+  if (classesChoisies.length === 0) { alert("Sélectionne d'abord au moins une classe."); return; }
+
+  const nom = prompt("Nom de la nouvelle matière :");
+  if (!nom) return;
+
+  const lignes = [];
+  const ignorees = [];
+  classesChoisies.forEach(classeId => {
+    if (toutesLesMatieres.some(m => m.classe_id === classeId && m.nom === nom)) {
+      const c = toutesLesClasses.find(cl => cl.id === classeId);
+      ignorees.push(c ? c.nom : '?');
+      return;
+    }
+    lignes.push({ classe_id: classeId, nom, ordre: 1 });
+  });
+
+  if (lignes.length > 0) {
+    const { data, error } = await supabaseClient.from('matieres').insert(lignes).select();
+    if (error) { alert("Erreur : " + error.message); return; }
+    toutesLesMatieres.push(...data);
+  }
+
+  remplirMatieres();
+  document.getElementById('matiere').value = nom;
+  remplirSousMatieres();
+
+  if (ignorees.length > 0) alert("Déjà existante pour : " + ignorees.join(', '));
+});
+
+document.getElementById('btnCreerSousMatiere').addEventListener('click', async () => {
+  const classesChoisies = Array.from(document.getElementById('classe').selectedOptions).map(o => o.value);
+  const nomMatiere = document.getElementById('matiere').value;
+  if (classesChoisies.length === 0 || !nomMatiere) { alert("Choisis d'abord classe(s) et matière."); return; }
+
+  const nom = prompt("Nom de la nouvelle sous-matière :");
+  if (!nom) return;
+
+  const lignes = [];
+  const ignorees = [];
+  classesChoisies.forEach(classeId => {
+    const matiere = toutesLesMatieres.find(m => m.classe_id === classeId && m.nom === nomMatiere);
+    if (!matiere) return;
+    if (toutesLesSousMatieres.some(sm => sm.matiere_id === matiere.id && sm.nom === nom)) {
+      const c = toutesLesClasses.find(cl => cl.id === classeId);
+      ignorees.push(c ? c.nom : '?');
+      return;
+    }
+    lignes.push({ matiere_id: matiere.id, nom, ordre: 1 });
+  });
+
+  if (lignes.length > 0) {
+    const { data, error } = await supabaseClient.from('sous_matieres').insert(lignes).select();
+    if (error) { alert("Erreur : " + error.message); return; }
+    toutesLesSousMatieres.push(...data);
+  }
+
+  remplirSousMatieres();
+  document.getElementById('sousMatiere').value = nom;
+  remplirUD();
+
+  if (ignorees.length > 0) alert("Déjà existante pour : " + ignorees.join(', '));
+});
+
+document.getElementById('btnCreerUD').addEventListener('click', async () => {
+  const classesChoisies = Array.from(document.getElementById('classe').selectedOptions).map(o => o.value);
+  const nomMatiere = document.getElementById('matiere').value;
+  const nomSM = document.getElementById('sousMatiere').value;
+  if (classesChoisies.length === 0 || !nomMatiere) { alert("Choisis d'abord classe(s) et matière."); return; }
+
+  const nom = prompt("Nom (ex: Unité 1 ou Dossier 2) :");
+  if (!nom) return;
+  const type = (prompt("Type — tape 'unite' ou 'dossier' :", "unite") || "").trim().toLowerCase();
+  if (type !== 'unite' && type !== 'dossier') { alert("Type invalide, annulé."); return; }
+  let semaine = null;
+  if (type === 'unite') {
+    const rep = (prompt("Semaine — tape 1 ou 2, ou laisse vide :", "") || "").trim();
+    if (rep === '1') semaine = "1ère semaine";
+    if (rep === '2') semaine = "2e semaine";
+  }
+
+  const lignes = [];
+  const ignorees = [];
+  classesChoisies.forEach(classeId => {
+    const matiere = toutesLesMatieres.find(m => m.classe_id === classeId && m.nom === nomMatiere);
+    if (!matiere) return;
+
+    let sousMatiereId = null;
+    if (nomSM) {
+      const sm = toutesLesSousMatieres.find(s => s.matiere_id === matiere.id && s.nom === nomSM);
+      if (!sm) return;
+      sousMatiereId = sm.id;
+    }
+
+    const existeDeja = sousMatiereId
+      ? tousLesUD.some(ud => ud.sous_matiere_id === sousMatiereId && ud.nom === nom)
+      : tousLesUD.some(ud => ud.matiere_id === matiere.id && ud.nom === nom);
+
+    if (existeDeja) {
+      const c = toutesLesClasses.find(cl => cl.id === classeId);
+      ignorees.push(c ? c.nom : '?');
+      return;
+    }
+
+    lignes.push({
+      type, semaine, nom, ordre: 1,
+      sous_matiere_id: sousMatiereId,
+      matiere_id: sousMatiereId ? null : matiere.id
+    });
+  });
+
+  if (lignes.length > 0) {
+    const { data, error } = await supabaseClient.from('unites_dossiers').insert(lignes).select();
+    if (error) { alert("Erreur : " + error.message); return; }
+    tousLesUD.push(...data);
+  }
+
+  remplirUD();
+  document.getElementById('uniteDossier').value = nom;
+  remplirSA();
+
+  if (ignorees.length > 0) alert("Déjà existante pour : " + ignorees.join(', '));
+});
+
+document.getElementById('btnCreerSA').addEventListener('click', async () => {
+  const classesChoisies = Array.from(document.getElementById('classe').selectedOptions).map(o => o.value);
+  const nomMatiere = document.getElementById('matiere').value;
+  const nomSM = document.getElementById('sousMatiere').value;
+  const nomUD = document.getElementById('uniteDossier').value;
+  if (classesChoisies.length === 0 || !nomMatiere) { alert("Choisis d'abord classe(s) et matière."); return; }
+
+  const nom = prompt("Nom de la nouvelle SA (ex: SA 1) :");
+  if (!nom) return;
+
+  const lignes = [];
+  const ignorees = [];
+  classesChoisies.forEach(classeId => {
+    const matiere = toutesLesMatieres.find(m => m.classe_id === classeId && m.nom === nomMatiere);
+    if (!matiere) return;
+
+    let sousMatiereId = null, uniteDossierId = null;
+
+    if (nomUD) {
+      let ud;
+      if (nomSM) {
+        const sm = toutesLesSousMatieres.find(s => s.matiere_id === matiere.id && s.nom === nomSM);
+        if (!sm) return;
+        ud = tousLesUD.find(u => u.sous_matiere_id === sm.id && u.nom === nomUD);
+      } else {
+        ud = tousLesUD.find(u => u.matiere_id === matiere.id && u.nom === nomUD);
+      }
+      if (!ud) return;
+      uniteDossierId = ud.id;
+    } else if (nomSM) {
+      const sm = toutesLesSousMatieres.find(s => s.matiere_id === matiere.id && s.nom === nomSM);
+      if (!sm) return;
+      sousMatiereId = sm.id;
+    }
+
+    const existeDeja = uniteDossierId
+      ? toutesLesSA.some(sa => sa.unite_dossier_id === uniteDossierId && sa.nom === nom)
+      : sousMatiereId
+        ? toutesLesSA.some(sa => sa.sous_matiere_id === sousMatiereId && sa.nom === nom)
+        : toutesLesSA.some(sa => sa.matiere_id === matiere.id && sa.nom === nom);
+
+    if (existeDeja) {
+      const c = toutesLesClasses.find(cl => cl.id === classeId);
+      ignorees.push(c ? c.nom : '?');
+      return;
+    }
+
+    lignes.push({
+      nom, ordre: 1,
+      unite_dossier_id: uniteDossierId,
+      sous_matiere_id: uniteDossierId ? null : sousMatiereId,
+      matiere_id: (uniteDossierId || sousMatiereId) ? null : matiere.id
+    });
+  });
+
+  if (lignes.length > 0) {
+    const { data, error } = await supabaseClient.from('sa').insert(lignes).select();
+    if (error) { alert("Erreur : " + error.message); return; }
+    toutesLesSA.push(...data);
+  }
+
+  remplirSA();
+  document.getElementById('sa').value = nom;
+
+  if (ignorees.length > 0) alert("Déjà existante pour : " + ignorees.join(', '));
+});
+
 chargerDonneesBase();
