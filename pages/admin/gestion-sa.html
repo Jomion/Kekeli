@@ -17,16 +17,13 @@
   <main class="admin-contenu">
 
     <form id="formAjout" class="admin-form admin-form-inline">
-      <label for="classe">Classe</label>
-      <select id="classe" required>
-        <option value="">-- Choisir une classe --</option>
-      </select>
+      <label for="classe">Classe(s) — Ctrl/Cmd + clic pour plusieurs</label>
+      <select id="classe" multiple size="6" required></select>
 
       <label for="matiere">Matière</label>
       <select id="matiere" required>
-        <option value="">-- Choisir d'abord une classe --</option>
+        <option value="">-- Choisir d'abord une/des classe(s) --</option>
       </select>
-
       <label for="sousMatiere">Sous-matière (si applicable)</label>
       <select id="sousMatiere">
         <option value="">-- Aucune / non applicable --</option>
@@ -52,8 +49,17 @@
       <select id="filtreClasse">
         <option value="">Toutes les classes</option>
       </select>
-    </div>
 
+      <label for="filtreMatiere">Filtrer par matière :</label>
+      <select id="filtreMatiere">
+        <option value="">Toutes les matières</option>
+      </select>
+
+      <label for="filtreUD">Filtrer par Unité/Dossier :</label>
+      <select id="filtreUD">
+        <option value="">Tous</option>
+      </select>
+    </div>
     <div id="listeSA" class="admin-liste">Chargement...</div>
 
   </main>
