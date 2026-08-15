@@ -1,36 +1,32 @@
 // Gestion CRUD des Unités/Dossiers
 
-async function verifierAccesSuperAdmin() {
-  await verifierConnexion();
-  if (profilAdmin.role !== 'super_admin') {
-    document.body.innerHTML = '<p style="padding:40px;text-align:center;color:#dc2626;">Accès réservé au super administrateur.</p>';
-    throw new Error('Accès refusé');
-  }
-}
-verifierAccesSuperAdmin();
+verifierConnexion();
 
 let udEnEdition = null;
 let toutesLesMatieres = [];
 let toutesLesSousMatieres = [];
+let toutesLesClasses = [];
 
-// Charge classes, matières et sous-matières une seule fois
 async function chargerDonneesBase() {
-  const resultatClasses = await supabaseClient.from('classes').select('*').order('ordre', { ascending: true });
-  const resultatMatieres = await supabaseClient.from('matieres').select('*');
-  const resultatSousMatieres = await supabaseClient.from('sous_matieres').select('*');
+  const [resClasses, resMatieres, resSousMatieres] = await Promise.all([
+    supabaseClient.from('classes').select('*').order('ordre', { ascending: true }),
+    supabaseClient.from('matieres').select('*'),
+    supabaseClient.from('sous_matieres').select('*')
+  ]);
 
-  if (resultatClasses.error) {
-    alert("Erreur classes : " + resultatClasses.error.message);
+  if (resClasses.error) {
+    alert("Erreur classes : " + resClasses.error.message);
     return;
   }
 
-  toutesLesMatieres = resultatMatieres.data || [];
-  toutesLesSousMatieres = resultatSousMatieres.data || [];
+  toutesLesClasses = resClasses.data;
+  toutesLesMatieres = resMatieres.data || [];
+  toutesLesSousMatieres = resSousMatieres.data || [];
 
   const selectClasse = document.getElementById('classe');
   const selectFiltre = document.getElementById('filtreClasse');
 
-  resultatClasses.data.forEach(classe => {
+  toutesLesClasses.forEach(classe => {
     const opt1 = document.createElement('option');
     opt1.value = classe.id;
     opt1.textContent = classe.nom;
@@ -42,55 +38,70 @@ async function chargerDonneesBase() {
     selectFiltre.appendChild(opt2);
   });
 
+  const nomsMatieresUniques = [...new Set(toutesLesMatieres.map(m => m.nom))].sort();
+  const selectFiltreMatiere = document.getElementById('filtreMatiere');
+  nomsMatieresUniques.forEach(nom => {
+    const opt = document.createElement('option');
+    opt.value = nom;
+    opt.textContent = nom;
+    selectFiltreMatiere.appendChild(opt);
+  });
+
   chargerListe();
 }
 
-// Remplit le menu Matière selon la classe choisie
+// Remplit Matière avec les noms distincts des matières des classes cochées
 function remplirMatieres() {
-  const classeId = document.getElementById('classe').value;
+  const classesChoisies = Array.from(document.getElementById('classe').selectedOptions).map(o => o.value);
   const selectMatiere = document.getElementById('matiere');
-  const selectSousMatiere = document.getElementById('sousMatiere');
+  document.getElementById('sousMatiere').innerHTML = '<option value="">-- Aucune / non applicable --</option>';
 
   selectMatiere.innerHTML = '<option value="">-- Choisir une matière --</option>';
-  selectSousMatiere.innerHTML = '<option value="">-- Aucune / non applicable --</option>';
+  if (classesChoisies.length === 0) return;
 
-  if (!classeId) {
-    selectMatiere.innerHTML = '<option value="">-- Choisir d\'abord une classe --</option>';
-    return;
-  }
+  const nomsDisponibles = [...new Set(
+    toutesLesMatieres.filter(m => classesChoisies.includes(m.classe_id)).map(m => m.nom)
+  )].sort();
 
-  toutesLesMatieres.filter(m => m.classe_id === classeId).forEach(matiere => {
+  nomsDisponibles.forEach(nom => {
     const opt = document.createElement('option');
-    opt.value = matiere.id;
-    opt.textContent = matiere.nom;
+    opt.value = nom;
+    opt.textContent = nom;
     selectMatiere.appendChild(opt);
   });
 }
 
-// Remplit le menu Sous-matière selon la matière choisie
+// Remplit Sous-matière avec les noms distincts pour la matière + classes choisies
 function remplirSousMatieres() {
-  const matiereId = document.getElementById('matiere').value;
-  const selectSousMatiere = document.getElementById('sousMatiere');
+  const classesChoisies = Array.from(document.getElementById('classe').selectedOptions).map(o => o.value);
+  const nomMatiere = document.getElementById('matiere').value;
+  const selectSM = document.getElementById('sousMatiere');
 
-  selectSousMatiere.innerHTML = '<option value="">-- Aucune / non applicable --</option>';
+  selectSM.innerHTML = '<option value="">-- Aucune / non applicable --</option>';
+  if (!nomMatiere) return;
 
-  if (!matiereId) return;
+  const matieresConcernees = toutesLesMatieres.filter(m => classesChoisies.includes(m.classe_id) && m.nom === nomMatiere);
+  const idsMatieres = matieresConcernees.map(m => m.id);
 
-  toutesLesSousMatieres.filter(sm => sm.matiere_id === matiereId).forEach(sm => {
+  const nomsSM = [...new Set(
+    toutesLesSousMatieres.filter(sm => idsMatieres.includes(sm.matiere_id)).map(sm => sm.nom)
+  )].sort();
+
+  nomsSM.forEach(nom => {
     const opt = document.createElement('option');
-    opt.value = sm.id;
-    opt.textContent = sm.nom;
-    selectSousMatiere.appendChild(opt);
+    opt.value = nom;
+    opt.textContent = nom;
+    selectSM.appendChild(opt);
   });
 }
 
 document.getElementById('classe').addEventListener('change', remplirMatieres);
 document.getElementById('matiere').addEventListener('change', remplirSousMatieres);
 
-// Charge et affiche la liste
 async function chargerListe() {
   const container = document.getElementById('listeUnitesDossiers');
   const filtreClasseId = document.getElementById('filtreClasse').value;
+  const filtreMatiereNom = document.getElementById('filtreMatiere').value;
 
   const { data, error } = await supabaseClient
     .from('unites_dossiers')
@@ -102,7 +113,6 @@ async function chargerListe() {
     return;
   }
 
-  // Détermine la classe réelle de chaque ligne (via sous-matière OU matière directe)
   const enrichi = data.map(item => {
     let matiereReelle = item.matieres;
     let sousMatiereNom = null;
@@ -123,7 +133,10 @@ async function chargerListe() {
 
   let donneesAffichees = enrichi;
   if (filtreClasseId) {
-    donneesAffichees = enrichi.filter(item => item.classeId === filtreClasseId);
+    donneesAffichees = donneesAffichees.filter(item => item.classeId === filtreClasseId);
+  }
+  if (filtreMatiereNom) {
+    donneesAffichees = donneesAffichees.filter(item => item.matiereNom === filtreMatiereNom);
   }
 
   if (donneesAffichees.length === 0) {
@@ -136,11 +149,12 @@ async function chargerListe() {
     const contexte = item.sousMatiereNom
       ? `${item.sousMatiereNom} - ${item.matiereNom}`
       : item.matiereNom;
+    const semaineAffichee = item.semaine ? ` - ${item.semaine}` : '';
 
     const ligne = document.createElement('div');
     ligne.className = 'admin-ligne';
     ligne.innerHTML = `
-      <span>${item.nom} <small>(${item.type} - ${contexte})</small></span>
+      <span>${item.nom} <small>(${item.type} - ${contexte}${semaineAffichee})</small></span>
       <div class="admin-ligne-actions">
         <button class="btn-modifier" data-id="${item.id}">✏️</button>
         <button class="btn-supprimer" data-id="${item.id}">🗑️</button>
@@ -161,15 +175,16 @@ function activerModeEdition(id, liste) {
   const item = liste.find(i => i.id === id);
   if (!item) return;
 
-  document.getElementById('classe').value = item.classeId;
+  Array.from(document.getElementById('classe').options).forEach(opt => {
+    opt.selected = (opt.value === item.classeId);
+  });
   remplirMatieres();
-
-  const matiereId = item.sous_matieres ? item.sous_matieres.matiere_id : item.matiere_id;
-  document.getElementById('matiere').value = matiereId;
+  document.getElementById('matiere').value = item.matiereNom;
   remplirSousMatieres();
+  document.getElementById('sousMatiere').value = item.sousMatiereNom || '';
 
-  document.getElementById('sousMatiere').value = item.sous_matiere_id || '';
   document.getElementById('type').value = item.type;
+  document.getElementById('semaine').value = item.semaine || '';
   document.getElementById('nom').value = item.nom;
   document.getElementById('ordre').value = item.ordre;
   udEnEdition = id;
@@ -195,42 +210,95 @@ async function supprimerUD(id) {
 document.getElementById('formAjout').addEventListener('submit', async (e) => {
   e.preventDefault();
 
-  const matiereId = document.getElementById('matiere').value;
-  const sousMatiereId = document.getElementById('sousMatiere').value;
+  const classesChoisies = Array.from(document.getElementById('classe').selectedOptions).map(o => o.value);
+  const nomMatiereChoisie = document.getElementById('matiere').value;
+  const nomSousMatiereChoisie = document.getElementById('sousMatiere').value;
   const type = document.getElementById('type').value;
+  const semaine = document.getElementById('semaine').value || null;
   const nom = document.getElementById('nom').value;
   const ordre = parseInt(document.getElementById('ordre').value);
   const messageForm = document.getElementById('messageForm');
 
-  // Si une sous-matière est choisie, on l'utilise ; sinon on rattache directement à la matière
-  const payload = {
-    type,
-    nom,
-    ordre,
-    sous_matiere_id: sousMatiereId || null,
-    matiere_id: sousMatiereId ? null : matiereId
-  };
+  if (classesChoisies.length === 0 || !nomMatiereChoisie) {
+    messageForm.textContent = "Sélectionne au moins une classe et une matière.";
+    return;
+  }
 
   let resultat;
+
   if (udEnEdition) {
-    resultat = await supabaseClient.from('unites_dossiers').update(payload).eq('id', udEnEdition);
+    const matiere = toutesLesMatieres.find(m => m.classe_id === classesChoisies[0] && m.nom === nomMatiereChoisie);
+    const sm = nomSousMatiereChoisie
+      ? toutesLesSousMatieres.find(s => s.matiere_id === matiere.id && s.nom === nomSousMatiereChoisie)
+      : null;
+
+    resultat = await supabaseClient.from('unites_dossiers').update({
+      type, semaine, nom, ordre,
+      sous_matiere_id: sm ? sm.id : null,
+      matiere_id: sm ? null : matiere.id
+    }).eq('id', udEnEdition);
   } else {
-    resultat = await supabaseClient.from('unites_dossiers').insert(payload);
+    const lignes = [];
+    const classesIgnorees = [];
+
+    classesChoisies.forEach(classeId => {
+      const matiere = toutesLesMatieres.find(m => m.classe_id === classeId && m.nom === nomMatiereChoisie);
+      if (!matiere) {
+        const classe = toutesLesClasses.find(c => c.id === classeId);
+        classesIgnorees.push(classe ? classe.nom : '?');
+        return;
+      }
+
+      let sousMatiereId = null;
+      if (nomSousMatiereChoisie) {
+        const sm = toutesLesSousMatieres.find(s => s.matiere_id === matiere.id && s.nom === nomSousMatiereChoisie);
+        if (!sm) {
+          const classe = toutesLesClasses.find(c => c.id === classeId);
+          classesIgnorees.push(classe ? classe.nom : '?');
+          return;
+        }
+        sousMatiereId = sm.id;
+      }
+
+      lignes.push({
+        type, semaine, nom, ordre,
+        sous_matiere_id: sousMatiereId,
+        matiere_id: sousMatiereId ? null : matiere.id
+      });
+    });
+
+    if (lignes.length === 0) {
+      messageForm.textContent = "Aucune des classes sélectionnées n'a cette matière/sous-matière.";
+      return;
+    }
+
+    resultat = await supabaseClient.from('unites_dossiers').insert(lignes);
+
+    if (!resultat.error && classesIgnorees.length > 0) {
+      messageForm.style.color = '#b45309';
+      messageForm.textContent = `Ajouté, mais ignoré pour : ${classesIgnorees.join(', ')}.`;
+    }
   }
 
   if (resultat.error) {
-    messageForm.textContent = "Erreur : " + resultat.error.message;
+    if (resultat.error.code === '23505') {
+      messageForm.textContent = "Cet élément existe déjà pour au moins une des classes sélectionnées.";
+    } else {
+      messageForm.textContent = "Erreur : " + resultat.error.message;
+    }
     return;
   }
 
   document.getElementById('formAjout').reset();
   document.querySelector('#formAjout button[type="submit"]').textContent = '➕ Ajouter';
   udEnEdition = null;
-  messageForm.textContent = '';
+  if (!messageForm.textContent.includes('ignoré')) messageForm.textContent = '';
+  messageForm.style.color = '';
 
   chargerListe();
 });
 
 document.getElementById('filtreClasse').addEventListener('change', chargerListe);
+document.getElementById('filtreMatiere').addEventListener('change', chargerListe);
 
 chargerDonneesBase();
