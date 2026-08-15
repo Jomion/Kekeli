@@ -1,0 +1,37 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Validation des séances - KEKELI</title>
+  <link rel="stylesheet" href="../../css/style.css">
+  <link rel="stylesheet" href="../../css/admin.css">
+</head>
+<body>
+
+  <header class="admin-header">
+    <h1>Validation</h1>
+    <a href="dashboard.html" class="btn-deconnexion">← Retour</a>
+  </header>
+
+  <main class="admin-contenu">
+
+    <div id="zoneAccesRefuse" style="display:none; padding:20px; text-align:center; color:#dc2626;">
+      Tu n'es pas désigné comme contrôleur.
+    </div>
+
+    <div id="zoneContenu" style="display:none;">
+      <p style="margin-bottom:16px; color:var(--texte-gris);">Séances en attente de validation, soumises par les administrateurs dont tu es le contrôleur (ou toutes, si tu es super administrateur).</p>
+      <div id="listeEnAttente" class="admin-liste">Chargement...</div>
+    </div>
+
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../../js/config.js"></script>
+  <script src="../../js/supabaseClient.js"></script>
+  <script src="../../js/auth.js"></script>
+  <script src="../../js/pages/admin-validation.js"></script>
+
+</body>
+</html>
