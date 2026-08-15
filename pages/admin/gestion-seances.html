@@ -110,7 +110,8 @@
     <button type="button" id="btnToggleFiltres" class="btn-secondaire" style="margin-bottom:12px;">🔍 Filtres et tri</button>
 
     <div class="admin-filtre" id="panneauFiltres" style="display:none;">
-      <label for="filtreClasse">Filtrer par classe :</label>      <select id="filtreClasse">
+      <label for="filtreClasse">Filtrer par classe :</label>
+      <select id="filtreClasse">
         <option value="">Toutes les classes</option>
       </select>
 
@@ -122,6 +123,18 @@
       <label for="filtreSousMatiere">Filtrer par sous-matière :</label>
       <select id="filtreSousMatiere">
         <option value="">Toutes</option>
+      </select>
+
+      <label for="filtreUD">Filtrer par Unité/Dossier :</label>
+      <select id="filtreUD">
+        <option value="">Tous</option>
+      </select>
+
+      <label for="filtreSemaine">Filtrer par semaine :</label>
+      <select id="filtreSemaine">
+        <option value="">Toutes</option>
+        <option value="1ère semaine">1ère semaine</option>
+        <option value="2e semaine">2e semaine</option>
       </select>
 
       <label for="filtreSA">Filtrer par SA :</label>
@@ -164,7 +177,7 @@
   <script src="../../js/config.js"></script>
   <script src="../../js/supabaseClient.js"></script>
   <script src="../../js/auth.js"></script>
-  <script src="../../js/pages/admin-seances.js?v=4"></script>
+  <script src="../../js/pages/admin-seances.js?v=5"></script>
 
 </body>
 </html>
