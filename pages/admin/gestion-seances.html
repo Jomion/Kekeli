@@ -21,24 +21,36 @@
       <select id="classe" multiple size="6" required></select>
 
       <label for="matiere">Matière</label>
-      <select id="matiere" required>
-        <option value="">-- Choisir d'abord une/des classe(s) --</option>
-      </select>
+      <div style="display:flex;gap:8px;">
+        <select id="matiere" required style="flex:1;">
+          <option value="">-- Choisir d'abord une/des classe(s) --</option>
+        </select>
+        <button type="button" id="btnCreerMatiere" class="btn-secondaire">➕ Créer</button>
+      </div>
+
       <label for="sousMatiere">Sous-matière (si applicable)</label>
-      <select id="sousMatiere">
-        <option value="">-- Aucune / non applicable --</option>
-      </select>
+      <div style="display:flex;gap:8px;">
+        <select id="sousMatiere" style="flex:1;">
+          <option value="">-- Aucune / non applicable --</option>
+        </select>
+        <button type="button" id="btnCreerSousMatiere" class="btn-secondaire">➕ Créer</button>
+      </div>
 
       <label for="uniteDossier">Unité / Dossier (si applicable)</label>
-      <select id="uniteDossier">
-        <option value="">-- Aucun --</option>
-      </select>
+      <div style="display:flex;gap:8px;">
+        <select id="uniteDossier" style="flex:1;">
+          <option value="">-- Aucun --</option>
+        </select>
+        <button type="button" id="btnCreerUD" class="btn-secondaire">➕ Créer</button>
+      </div>
 
       <label for="sa">SA (si applicable)</label>
-      <select id="sa">
-        <option value="">-- Aucune / rattacher directement --</option>
-      </select>
-
+      <div style="display:flex;gap:8px;">
+        <select id="sa" style="flex:1;">
+          <option value="">-- Aucune / rattacher directement --</option>
+        </select>
+        <button type="button" id="btnCreerSA" class="btn-secondaire">➕ Créer</button>
+      </div>
       <label for="libelle">Libellé</label>
       <select id="libelle">
         <option value="seance">Séance</option>
