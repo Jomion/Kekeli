@@ -146,11 +146,12 @@ async function chargerListe() {
 
   container.innerHTML = '';
   donneesAffichees.forEach(item => {
+    const classeObj = toutesLesClasses.find(c => c.id === item.classeId);
+    const nomClasseAffiche = classeObj ? classeObj.nom : '?';
     const contexte = item.sousMatiereNom
-      ? `${item.sousMatiereNom} - ${item.matiereNom}`
-      : item.matiereNom;
+      ? `${item.sousMatiereNom} - ${item.matiereNom} - ${nomClasseAffiche}`
+      : `${item.matiereNom} - ${nomClasseAffiche}`;
     const semaineAffichee = item.semaine ? ` - ${item.semaine}` : '';
-
     const ligne = document.createElement('div');
     ligne.className = 'admin-ligne';
     ligne.innerHTML = `
