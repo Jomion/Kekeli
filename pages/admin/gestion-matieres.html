@@ -19,9 +19,11 @@
     <form id="formAjout" class="admin-form admin-form-inline">
       <label for="classe">Classe(s) — Ctrl/Cmd + clic pour plusieurs</label>
       <select id="classe" multiple size="6" required></select>
-      <label for="nom">Nom de la matière</label>
-      <input type="text" id="nom" placeholder="Ex: Français" required>
+      <label for="nom">Nom de la matière (court, pour l'admin)</label>
+      <input type="text" id="nom" placeholder="Ex: ES" required>
 
+      <label for="nomComplet">Nom complet (affiché au public, facultatif)</label>
+      <input type="text" id="nomComplet" placeholder="Ex: Enseignement Social">
       <label for="ordre">Ordre d'affichage</label>
       <input type="number" id="ordre" placeholder="Ex: 1" required>
 
