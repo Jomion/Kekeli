@@ -26,6 +26,7 @@
     <a href="gestion-epreuves.html" class="admin-carte" id="carteEpreuves" style="display:none;">📄<br>Épreuves</a>
     <a href="gestion-ressources.html" class="admin-carte" id="carteRessources" style="display:none;">📁<br>Ressources</a>
     <a href="gestion-administrateurs.html" class="admin-carte" id="carteAdmins" style="display:none;">👑<br>Administrateurs</a>
+    <a href="validation.html" class="admin-carte" id="carteValidation" style="display:none;">✅<br>Validation</a>
 </main>
 
   <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
@@ -45,6 +46,9 @@
         document.getElementById('carteAdmins').style.display = 'flex';
       }
 
+      if (peutValider()) {
+        document.getElementById('carteValidation').style.display = 'flex';
+      }
       if (peutAccederType('seances')) document.getElementById('carteSeances').style.display = 'flex';
       if (peutAccederType('exercices')) document.getElementById('carteExercices').style.display = 'flex';
       if (peutAccederType('quiz')) document.getElementById('carteQuiz').style.display = 'flex';
