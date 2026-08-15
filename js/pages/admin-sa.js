@@ -1,7 +1,5 @@
 // Gestion CRUD des SA
 
-verifierConnexion();
-
 let saEnEdition = null;
 let toutesLesClasses = [];
 let toutesLesMatieres = [];
@@ -391,4 +389,12 @@ document.getElementById('filtreClasse').addEventListener('change', chargerListe)
 document.getElementById('filtreMatiere').addEventListener('change', chargerListe);
 document.getElementById('filtreUD').addEventListener('change', chargerListe);
 
-chargerDonneesBase();
+async function initPage() {
+  await verifierConnexion();
+  if (!profilAdmin || profilAdmin.role !== 'super_admin') {
+    document.body.innerHTML = '<p style="padding:40px;text-align:center;color:#dc2626;">Accès réservé au super administrateur.</p>';
+    return;
+  }
+  chargerDonneesBase();
+}
+initPage();
