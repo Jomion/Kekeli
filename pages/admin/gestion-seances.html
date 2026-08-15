@@ -51,6 +51,7 @@
         </select>
         <button type="button" id="btnCreerSA" class="btn-secondaire">➕ Créer</button>
       </div>
+
       <label for="libelle">Libellé</label>
       <select id="libelle">
         <option value="seance">Séance</option>
@@ -59,8 +60,6 @@
 
       <label for="numero">Numéro</label>
       <input type="number" id="numero" placeholder="Ex: 1">
-
-      <label for="titre">Titre</label>
 
       <label for="titre">Titre</label>
       <input type="text" id="titre" placeholder="Ex: Le présent de l'indicatif" required>
@@ -109,6 +108,11 @@
     </form>
 
     <div class="admin-filtre">
+      <label for="filtreClasse">Filtrer par classe :</label>
+      <select id="filtreClasse">
+        <option value="">Toutes les classes</option>
+      </select>
+
       <label for="filtreMatiere">Filtrer par matière :</label>
       <select id="filtreMatiere">
         <option value="">Toutes les matières</option>
@@ -124,6 +128,7 @@
         <option value="">Toutes</option>
       </select>
     </div>
+
     <div id="listeSeances" class="admin-liste">Chargement...</div>
 
   </main>
@@ -132,7 +137,7 @@
   <script src="../../js/config.js"></script>
   <script src="../../js/supabaseClient.js"></script>
   <script src="../../js/auth.js"></script>
-  <script src="../../js/pages/admin-seances.js?v=2"></script>
+  <script src="../../js/pages/admin-seances.js?v=3"></script>
 
 </body>
 </html>
