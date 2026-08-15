@@ -1,7 +1,5 @@
 // Gestion CRUD des sous-matières
 
-verifierConnexion();
-
 let sousMatiereEnEdition = null;
 let toutesLesMatieres = [];
 let toutesLesClasses = [];
@@ -229,4 +227,12 @@ document.getElementById('formAjout').addEventListener('submit', async (e) => {
 document.getElementById('filtreClasse').addEventListener('change', chargerListe);
 document.getElementById('filtreMatiere').addEventListener('change', chargerListe);
 
-chargerClasses();
+async function initPage() {
+  await verifierConnexion();
+  if (!profilAdmin || profilAdmin.role !== 'super_admin') {
+    document.body.innerHTML = '<p style="padding:40px;text-align:center;color:#dc2626;">Accès réservé au super administrateur.</p>';
+    return;
+  }
+  chargerClasses();
+}
+initPage();
