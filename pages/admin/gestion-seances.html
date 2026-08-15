@@ -107,9 +107,10 @@
       <p id="messageForm" class="message-erreur"></p>
     </form>
 
-    <div class="admin-filtre">
-      <label for="filtreClasse">Filtrer par classe :</label>
-      <select id="filtreClasse">
+    <button type="button" id="btnToggleFiltres" class="btn-secondaire" style="margin-bottom:12px;">🔍 Filtres et tri</button>
+
+    <div class="admin-filtre" id="panneauFiltres" style="display:none;">
+      <label for="filtreClasse">Filtrer par classe :</label>      <select id="filtreClasse">
         <option value="">Toutes les classes</option>
       </select>
 
