@@ -17,14 +17,12 @@
   <main class="admin-contenu">
 
     <form id="formAjout" class="admin-form admin-form-inline">
-      <label for="classe">Classe</label>
-      <select id="classe" required>
-        <option value="">-- Choisir une classe --</option>
-      </select>
+      <label for="classe">Classe(s) — Ctrl/Cmd + clic pour plusieurs</label>
+      <select id="classe" multiple size="6" required></select>
 
       <label for="matiere">Matière</label>
       <select id="matiere" required>
-        <option value="">-- Choisir d'abord une classe --</option>
+        <option value="">-- Choisir d'abord une/des classe(s) --</option>
       </select>
 
       <label for="sousMatiere">Sous-matière (si applicable)</label>
@@ -38,9 +36,15 @@
         <option value="dossier">Dossier</option>
       </select>
 
+      <label for="semaine">Semaine (si applicable, pour les Unités)</label>
+      <select id="semaine">
+        <option value="">-- Non applicable --</option>
+        <option value="1ère semaine">1ère semaine</option>
+        <option value="2e semaine">2e semaine</option>
+      </select>
+
       <label for="nom">Nom</label>
       <input type="text" id="nom" placeholder="Ex: Unité 1 ou Dossier 2" required>
-
       <label for="ordre">Ordre d'affichage</label>
       <input type="number" id="ordre" placeholder="Ex: 1" required>
 
@@ -53,8 +57,12 @@
       <select id="filtreClasse">
         <option value="">Toutes les classes</option>
       </select>
-    </div>
 
+      <label for="filtreMatiere">Filtrer par matière :</label>
+      <select id="filtreMatiere">
+        <option value="">Toutes les matières</option>
+      </select>
+    </div>
     <div id="listeUnitesDossiers" class="admin-liste">Chargement...</div>
 
   </main>
