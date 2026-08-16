@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Ressources - KEKELI</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+  <header class="header">
+    <a href="../index.html" class="logo-placeholder">KEKELI</a>
+    <button class="menu-toggle" id="menuToggle">☰</button>
+  </header>
+
+  <nav class="menu" id="menu">
+    <a href="cours.html">Cours</a>
+    <a href="exercices.html">Exercices</a>
+    <a href="quiz.html">Quiz</a>
+    <a href="matieres.html">Matières</a>
+    <a href="epreuves.html">Épreuves</a>
+    <a href="ressources.html">Ressources</a>
+    <a href="recherche.html">Recherche</a>
+  </nav>
+
+  <main>
+    <section class="hero" style="padding:24px 20px;">
+      <h1 style="font-size:24px;">Ressources</h1>
+      <div style="margin-top:16px;display:flex;flex-direction:column;gap:10px;max-width:300px;">
+        <select id="selectClasse" style="padding:12px 14px;border:1px solid var(--bordure);border-radius:8px;font-size:16px;">
+          <option value="">-- Toutes les classes --</option>
+        </select>
+        <select id="selectType" style="padding:12px 14px;border:1px solid var(--bordure);border-radius:8px;font-size:16px;">
+          <option value="">-- Tous les types --</option>
+          <option value="pdf">PDF</option>
+          <option value="image">Image</option>
+          <option value="fiche">Fiche</option>
+          <option value="document">Document</option>
+          <option value="corrige">Corrigé</option>
+          <option value="autre">Autre</option>
+        </select>
+      </div>
+    </section>
+
+    <section class="classes-list">
+      <div id="listeRessourcesPublic">Chargement...</div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/supabaseClient.js"></script>
+  <script src="../js/components/menu.js"></script>
+  <script src="../js/pages/ressources-liste.js"></script>
+
+</body>
+</html>
