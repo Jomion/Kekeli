@@ -6,6 +6,8 @@ const smId = params.get('sm');
 const udId = params.get('ud');
 const saId = params.get('sa');
 
+let nomMatiereActuelle = '';
+
 function construireLien(nouveauxParams) {
   const p = new URLSearchParams();
   p.set('id', matiereId);
@@ -13,6 +15,30 @@ function construireLien(nouveauxParams) {
   if (nouveauxParams.ud) p.set('ud', nouveauxParams.ud);
   if (nouveauxParams.sa) p.set('sa', nouveauxParams.sa);
   return 'matiere.html?' + p.toString();
+}
+
+async function construireFilArianeActuel() {
+  const parties = [nomMatiereActuelle];
+
+  if (smId) {
+    const { data: sm } = await supabaseClient.from('sous_matieres').select('*').eq('id', smId).single();
+    if (sm) parties.push(sm.nom);
+  }
+  if (udId) {
+    const { data: ud } = await supabaseClient.from('unites_dossiers').select('*').eq('id', udId).single();
+    if (ud) parties.push(ud.semaine ? `${ud.nom} (${ud.semaine})` : ud.nom);
+  }
+  if (saId) {
+    const { data: sa } = await supabaseClient.from('sa').select('*').eq('id', saId).single();
+    if (sa) parties.push(sa.nom);
+  }
+
+  return parties.join(' › ');
+}
+
+function afficherFilAriane(texte) {
+  const zone = document.getElementById('filAriane');
+  if (zone) zone.textContent = texte;
 }
 
 function afficherListeStructure(items, type) {
@@ -40,6 +66,7 @@ function afficherListeStructure(items, type) {
 
 async function afficherSeances(filtre) {
   const container = document.getElementById('contenuMatiere');
+  const filAriane = await construireFilArianeActuel();
 
   let requete = supabaseClient.from('seances').select('*').eq('statut', 'publie').order('ordre', { ascending: true });
   Object.keys(filtre).forEach(cle => {
@@ -54,11 +81,14 @@ async function afficherSeances(filtre) {
   }
 
   if (data.length === 0) {
-    container.innerHTML = "Aucune séance publiée pour l'instant à cet endroit.";
+    container.innerHTML = `<p style="padding:0 20px;color:var(--texte-gris);font-size:13px;">${filAriane}</p><p style="padding:0 20px;">Aucune séance publiée pour l'instant à cet endroit.</p>`;
     return;
   }
 
-  container.innerHTML = '<div id="grille" style="display:flex;flex-direction:column;gap:10px;padding:0 20px 24px;"></div>';
+  container.innerHTML = `
+    <p style="padding:0 20px;color:var(--texte-gris);font-size:13px;margin-bottom:12px;">${filAriane}</p>
+    <div id="grille" style="display:flex;flex-direction:column;gap:10px;padding:0 20px 24px;"></div>
+  `;
   const grille = document.getElementById('grille');
 
   data.forEach(seance => {
@@ -84,15 +114,14 @@ async function chargerContenu() {
     return;
   }
 
-  document.getElementById('titreMatiere').textContent = matiere.nom_complet || matiere.nom;
+  nomMatiereActuelle = matiere.nom_complet || matiere.nom;
+  document.getElementById('titreMatiere').textContent = nomMatiereActuelle;
 
-  // Niveau SA choisi -> on affiche les séances de cette SA
   if (saId) {
     afficherSeances({ sa_id: saId });
     return;
   }
 
-  // Niveau Unité/Dossier choisi -> on cherche des SA dessous, sinon les séances
   if (udId) {
     const { data: saList } = await supabaseClient.from('sa').select('*').eq('unite_dossier_id', udId).order('ordre', { ascending: true });
     if (saList && saList.length > 0) { afficherListeStructure(saList, 'sa'); return; }
@@ -100,7 +129,6 @@ async function chargerContenu() {
     return;
   }
 
-  // Niveau Sous-matière choisi -> on cherche Unité/Dossier, sinon SA, sinon séances
   if (smId) {
     const { data: udList } = await supabaseClient.from('unites_dossiers').select('*').eq('sous_matiere_id', smId).order('ordre', { ascending: true });
     if (udList && udList.length > 0) { afficherListeStructure(udList, 'ud'); return; }
@@ -112,7 +140,6 @@ async function chargerContenu() {
     return;
   }
 
-  // Racine de la matière -> Sous-matière, sinon Unité/Dossier, sinon SA, sinon séances
   const { data: smList } = await supabaseClient.from('sous_matieres').select('*').eq('matiere_id', matiereId).order('ordre', { ascending: true });
   if (smList && smList.length > 0) { afficherListeStructure(smList, 'sm'); return; }
 
