@@ -1,14 +1,42 @@
-// Page publique : liste des matières d'une classe
+// Page publique : liste des matières d'une classe (ou sélection de classe si aucune fournie)
 
 const paramsUrl = new URLSearchParams(window.location.search);
 const classeId = paramsUrl.get('classe');
+
+async function afficherSelecteurClasse() {
+  const zone = document.getElementById('zoneSelectClasse');
+  const select = document.getElementById('selectClasseCours');
+  document.getElementById('titreClasse').textContent = "Cours";
+  document.getElementById('listeMatieres').innerHTML = '';
+  zone.style.display = 'block';
+
+  const { data: classes, error } = await supabaseClient
+    .from('classes')
+    .select('*')
+    .order('ordre', { ascending: true });
+
+  if (error) return;
+
+  classes.forEach(classe => {
+    const opt = document.createElement('option');
+    opt.value = classe.id;
+    opt.textContent = classe.nom;
+    select.appendChild(opt);
+  });
+
+  select.addEventListener('change', (e) => {
+    if (e.target.value) {
+      window.location.href = `cours.html?classe=${e.target.value}`;
+    }
+  });
+}
 
 async function chargerMatieres() {
   const container = document.getElementById('listeMatieres');
   const titre = document.getElementById('titreClasse');
 
   if (!classeId) {
-    container.innerHTML = "Aucune classe sélectionnée. Retourne à l'accueil pour en choisir une.";
+    afficherSelecteurClasse();
     return;
   }
 
