@@ -11,6 +11,59 @@ function bloc(titre, contenu) {
   </section>`;
 }
 
+// Reconstitue le chemin complet (Matière > Sous-matière > Unité > SA) en remontant les relations
+async function construireFilAriane(seance) {
+  const parties = [];
+
+  let matiereId = seance.matiere_id;
+  let sousMatiereId = seance.sous_matiere_id;
+  let uniteDossierId = seance.unite_dossier_id;
+  let nomSA = null;
+
+  if (seance.sa_id) {
+    const { data: sa } = await supabaseClient.from('sa').select('*').eq('id', seance.sa_id).single();
+    if (sa) {
+      nomSA = sa.nom;
+      uniteDossierId = sa.unite_dossier_id;
+      sousMatiereId = sa.sous_matiere_id;
+      matiereId = sa.matiere_id;
+    }
+  }
+
+  let nomUD = null, semaineUD = null;
+  if (uniteDossierId) {
+    const { data: ud } = await supabaseClient.from('unites_dossiers').select('*').eq('id', uniteDossierId).single();
+    if (ud) {
+      nomUD = ud.nom;
+      semaineUD = ud.semaine;
+      if (!sousMatiereId) sousMatiereId = ud.sous_matiere_id;
+      if (!matiereId) matiereId = ud.matiere_id;
+    }
+  }
+
+  let nomSM = null;
+  if (sousMatiereId) {
+    const { data: sm } = await supabaseClient.from('sous_matieres').select('*').eq('id', sousMatiereId).single();
+    if (sm) {
+      nomSM = sm.nom;
+      if (!matiereId) matiereId = sm.matiere_id;
+    }
+  }
+
+  let nomMatiere = null;
+  if (matiereId) {
+    const { data: m } = await supabaseClient.from('matieres').select('*').eq('id', matiereId).single();
+    if (m) nomMatiere = m.nom_complet || m.nom;
+  }
+
+  if (nomMatiere) parties.push(nomMatiere);
+  if (nomSM) parties.push(nomSM);
+  if (nomUD) parties.push(semaineUD ? `${nomUD} (${semaineUD})` : nomUD);
+  if (nomSA) parties.push(nomSA);
+
+  return parties.join(' › ');
+}
+
 async function chargerSeance() {
   const container = document.getElementById('contenuSeance');
 
@@ -32,8 +85,8 @@ async function chargerSeance() {
   }
 
   const libelleAffiche = `${seance.libelle === 'seance' ? 'Séance' : 'Séquence'} ${seance.numero || ''}`.trim();
+  const filAriane = await construireFilAriane(seance);
 
-  // Récupère les exercices publiés liés à cette séance
   const { data: exercices } = await supabaseClient
     .from('exercices')
     .select('id, titre')
@@ -54,6 +107,7 @@ async function chargerSeance() {
   }
 
   container.innerHTML = `
+    <p style="color:var(--texte-gris);font-size:13px;margin-bottom:2px;">${filAriane}</p>
     <p style="color:var(--texte-gris);font-size:13px;margin-bottom:4px;">${libelleAffiche}</p>
     <h1 style="font-size:22px;color:var(--bleu-fonce);margin-bottom:20px;">${seance.titre}</h1>
 
