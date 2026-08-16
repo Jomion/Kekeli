@@ -3,7 +3,7 @@
 <head>
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
-  <title>Validation des séances - KEKELI</title>
+  <title>Validation - KEKELI</title>
   <link rel="stylesheet" href="../../css/style.css">
   <link rel="stylesheet" href="../../css/admin.css">
 </head>
@@ -21,7 +21,16 @@
     </div>
 
     <div id="zoneContenu" style="display:none;">
-      <p style="margin-bottom:16px; color:var(--texte-gris);">Séances en attente de validation, soumises par les administrateurs dont tu es le contrôleur (ou toutes, si tu es super administrateur).</p>
+
+      <div style="display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;">
+        <button class="btn-secondaire onglet-validation" data-type="seances">📝 Séances</button>
+        <button class="btn-secondaire onglet-validation" data-type="exercices">✏️ Exercices</button>
+        <button class="btn-secondaire onglet-validation" data-type="quiz">🧠 Quiz</button>
+        <button class="btn-secondaire onglet-validation" data-type="epreuves">📄 Épreuves</button>
+        <button class="btn-secondaire onglet-validation" data-type="ressources">📁 Ressources</button>
+      </div>
+
+      <p style="margin-bottom:16px; color:var(--texte-gris);" id="descriptionOnglet"></p>
       <div id="listeEnAttente" class="admin-liste">Chargement...</div>
     </div>
 
