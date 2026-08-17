@@ -451,6 +451,11 @@ function activerModeEdition(id, liste) {
   document.getElementById('statut').value = seance.statut === 'publie' ? 'en_attente' : seance.statut;
   document.getElementById('ordre').value = seance.ordre;
 
+  // Charge les blocs de contenu enrichi existants pour cette séance
+  supabaseClient.from('seance_blocs').select('*').eq('seance_id', id).order('ordre', { ascending: true })
+    .then(({ data }) => chargerBlocsExistants(data || []));
+
+  seanceEnEdition = id;
   seanceEnEdition = id;
   document.querySelector('#formAjout button[type="submit"]').textContent = '✏️ Modifier';
   window.scrollTo({ top: 0, behavior: 'smooth' });
@@ -536,6 +541,12 @@ document.getElementById('formAjout').addEventListener('submit', async (e) => {
   e.preventDefault();
 
   if (!peutModifier()) return;
+  document.getElementById('formAjout').addEventListener('submit', async (e) => {
+  e.preventDefault();
+
+  if (!peutModifier()) return;
+
+  synchroniserContenuBlocs();
 
   const classesChoisies = Array.from(document.getElementById('classe').selectedOptions).map(o => o.value);
   const nomMatiere = document.getElementById('matiere').value;
@@ -571,6 +582,8 @@ document.getElementById('formAjout').addEventListener('submit', async (e) => {
 
   let resultat;
 
+    let idSeanceTraitee = null;
+
   if (seanceEnEdition) {
     const cible = resoudreCibleSeance(classesChoisies[0], nomMatiere, nomSM, nomUD, nomSA);
     if (!cible) {
@@ -582,6 +595,7 @@ document.getElementById('formAjout').addEventListener('submit', async (e) => {
       return;
     }
     resultat = await supabaseClient.from('seances').update({ ...donneesCommunes, ...cible }).eq('id', seanceEnEdition);
+    idSeanceTraitee = seanceEnEdition;
   } else {
     const lignes = [];
     const classesIgnorees = [];
@@ -608,7 +622,10 @@ document.getElementById('formAjout').addEventListener('submit', async (e) => {
       return;
     }
 
-    resultat = await supabaseClient.from('seances').insert(lignes);
+        resultat = await supabaseClient.from('seances').insert(lignes).select();
+    if (resultat.data && resultat.data.length > 0) {
+      idSeanceTraitee = resultat.data[0].id;
+    }
 
     const messages = [];
     if (classesIgnorees.length > 0) messages.push(`combinaison absente pour : ${classesIgnorees.join(', ')}`);
@@ -619,14 +636,29 @@ document.getElementById('formAjout').addEventListener('submit', async (e) => {
     }
   }
 
-  if (resultat.error) {
+    if (resultat.error) {
     messageForm.textContent = "Erreur : " + resultat.error.message;
     return;
+  }
+
+  // Sauvegarde les blocs de contenu enrichi (supprime les anciens, réinsère les actuels)
+  if (idSeanceTraitee) {
+    await supabaseClient.from('seance_blocs').delete().eq('seance_id', idSeanceTraitee);
+    if (blocsActuels.length > 0) {
+      const lignesBlocs = blocsActuels.map((b, i) => ({
+        seance_id: idSeanceTraitee,
+        type: b.type,
+        ordre: i,
+        contenu: b.contenu
+      }));
+      await supabaseClient.from('seance_blocs').insert(lignesBlocs);
+    }
   }
 
   document.getElementById('formAjout').reset();
   document.querySelector('#formAjout button[type="submit"]').textContent = '➕ Ajouter';
   seanceEnEdition = null;
+  reinitialiserBlocs();
   if (!messageForm.textContent.includes('ignoré')) messageForm.textContent = '';
   messageForm.style.color = '';
 
