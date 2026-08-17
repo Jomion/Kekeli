@@ -267,17 +267,23 @@ a {
   max-height: 54px;
   display: block;
 }
+.header .menu-toggle {
+  color: var(--texte-fonce);
+}
+
+.header-fusionne .menu-toggle {
+  color: #ffffff;
+}
+
 .menu-toggle {
   font-size: 26px;
   background: none;
   border: none;
   cursor: pointer;
-  color: #ffffff;
   padding: 6px 10px;
   position: relative;
   z-index: 2;
 }
-
 .bande-lumiere .slogan-anime {
   position: relative;
   z-index: 2;
