@@ -218,3 +218,15 @@ a {
     font-size: 20px;
   }
 }
+/* ===== Logo dans le header ===== */
+.logo-img {
+  height: 38px;
+  width: auto;
+  display: block;
+}
+
+@media (min-width: 768px) {
+  .logo-img {
+    height: 46px;
+  }
+}
