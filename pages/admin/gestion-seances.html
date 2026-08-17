@@ -195,6 +195,12 @@
     <div id="listeSeances" class="admin-liste">Chargement...</div>
 
   </main>
+    <div id="modalPrevisualisation" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:500;overflow-y:auto;">
+    <div style="background:white;max-width:700px;margin:20px auto;border-radius:12px;padding:20px;position:relative;">
+      <button type="button" id="btnFermerPreview" style="position:absolute;top:12px;right:12px;background:none;border:none;font-size:24px;cursor:pointer;">✕</button>
+      <div id="contenuPreview"></div>
+    </div>
+  </div>
 
   <button id="btnRetourHaut" style="position:fixed;bottom:20px;right:20px;width:50px;height:50px;border-radius:50%;background:var(--bleu-principal);color:white;border:none;font-size:20px;box-shadow:0 2px 8px rgba(0,0,0,0.3);display:none;cursor:pointer;z-index:200;">↑</button>
 
