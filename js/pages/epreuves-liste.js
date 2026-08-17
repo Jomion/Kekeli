@@ -25,7 +25,7 @@ async function chargerClassesEpreuves() {
 function remplirMatieresEpreuves() {
   const classeId = document.getElementById('selectClasse').value;
   const select = document.getElementById('selectMatiere');
-  select.innerHTML = '<option value="">-- Toutes les matières --</option>';
+  select.innerHTML = '<option value="">-- Tous les champs de formation --</option>';
 
   const source = classeId ? toutesLesMatieresEpr.filter(m => m.classe_id === classeId) : toutesLesMatieresEpr;
   source.forEach(m => {
