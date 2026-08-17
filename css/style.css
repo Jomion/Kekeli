@@ -207,17 +207,19 @@ a {
 .bande-lumiere .slogan-anime {
   position: relative;
   z-index: 2;
+  width: 100%;
   color: #9d174d;
   font-weight: 600;
   font-style: italic;
-  font-size: 15px;
-  letter-spacing: 0.5px;
+  font-size: 13px;
+  letter-spacing: 0.3px;
   opacity: 0;
   text-align: center;
-  padding: 6px 16px 0;
+  padding: 4px 16px 0;
+  margin: 0;
+  box-sizing: border-box;
   animation: apparaitreSlogan 4s ease-in-out infinite;
 }
-
 @keyframes fondBande {
   0% { background: #0a0a0a; }
   55% { background: #0a0a0a; }
@@ -242,16 +244,15 @@ a {
 
 @media (min-width: 768px) {
   .bande-lumiere {
-    min-height: 90px;
+    min-height: 100px;
   }
   .logo-img {
-    max-height: 56px;
+    max-height: 70px;
   }
   .bande-lumiere .slogan-anime {
-    font-size: 20px;
+    font-size: 18px;
   }
-}
-/* ===== Logo dans le header ===== */
+}/* ===== Logo dans le header ===== */
 .logo-img {
   height: 38px;
   width: auto;
