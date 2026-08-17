@@ -156,11 +156,11 @@ a {
   position: relative;
   width: 100%;
   height: 70px;
-  background: #0a0a0a;
   overflow: hidden;
   display: flex;
   align-items: center;
   justify-content: center;
+  animation: fondBande 4s ease-in-out infinite;
 }
 
 .bande-lumiere .lumiere {
@@ -170,7 +170,7 @@ a {
   height: 100%;
   width: 0;
   transform: translateX(-50%);
-  background: radial-gradient(ellipse at center, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.3) 40%, rgba(255,255,255,0) 75%);
+  background: radial-gradient(ellipse at center, rgba(255,255,255,1) 0%, rgba(255,255,255,0.6) 50%, rgba(255,255,255,0) 90%);
   animation: grandirLumiere 4s ease-in-out infinite;
 }
 
@@ -188,17 +188,26 @@ a {
   animation: apparaitreSlogan 4s ease-in-out infinite;
 }
 
+@keyframes fondBande {
+  0% { background: #0a0a0a; }
+  55% { background: #0a0a0a; }
+  75% { background: #ffffff; }
+  90% { background: #ffffff; }
+  100% { background: #0a0a0a; }
+}
+
 @keyframes grandirLumiere {
   0% { width: 0; }
-  60% { width: 140%; }
-  100% { width: 140%; }
+  70% { width: 200%; }
+  100% { width: 200%; }
 }
 
 @keyframes apparaitreSlogan {
   0% { opacity: 0; }
   55% { opacity: 0; }
   75% { opacity: 1; }
-  100% { opacity: 1; }
+  92% { opacity: 1; }
+  100% { opacity: 0; }
 }
 
 @media (min-width: 768px) {
