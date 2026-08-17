@@ -33,10 +33,10 @@ async function chargerDonneesBase() {
 
   const selectClasse = document.getElementById('classe');
   toutesLesClasses.forEach(classe => {
-    const opt1 = document.createElement('option');
-    opt1.value = classe.id;
-    opt1.textContent = classe.nom;
-    selectClasse.appendChild(opt1);
+    const opt = document.createElement('option');
+    opt.value = classe.id;
+    opt.textContent = classe.nom;
+    selectClasse.appendChild(opt);
   });
 
   remplirFiltreClasse();
@@ -438,16 +438,6 @@ function activerModeEdition(id, liste) {
   document.getElementById('libelle').value = seance.libelle;
   document.getElementById('numero').value = seance.numero || '';
   document.getElementById('titre').value = seance.titre;
-  document.getElementById('objectif').value = seance.objectif || '';
-  document.getElementById('competence').value = seance.competence || '';
-  document.getElementById('prerequis').value = seance.prerequis || '';
-  document.getElementById('introduction').value = seance.introduction || '';
-  document.getElementById('contenu').value = seance.contenu || '';
-  document.getElementById('exemples').value = seance.exemples || '';
-  document.getElementById('resume').value = seance.resume || '';
-  document.getElementById('aRetenir').value = seance.a_retenir || '';
-  document.getElementById('attention').value = seance.attention || '';
-  document.getElementById('avertissement').value = seance.avertissement || '';
   document.getElementById('statut').value = seance.statut === 'publie' ? 'en_attente' : seance.statut;
   document.getElementById('ordre').value = seance.ordre;
 
@@ -456,13 +446,12 @@ function activerModeEdition(id, liste) {
     .then(({ data }) => chargerBlocsExistants(data || []));
 
   seanceEnEdition = id;
-  seanceEnEdition = id;
   document.querySelector('#formAjout button[type="submit"]').textContent = '✏️ Modifier';
   window.scrollTo({ top: 0, behavior: 'smooth' });
 }
 
 async function supprimerSeance(id) {
-  const confirmation = window.confirm("Supprimer cette séance ? Tout son contenu lié (exercices...) sera aussi supprimé.");
+  const confirmation = window.confirm("Supprimer cette séance ? Tout son contenu lié (exercices, blocs...) sera aussi supprimé.");
   if (confirmation !== true) return;
 
   const { error } = await supabaseClient.from('seances').delete().eq('id', id);
@@ -541,10 +530,6 @@ document.getElementById('formAjout').addEventListener('submit', async (e) => {
   e.preventDefault();
 
   if (!peutModifier()) return;
-  document.getElementById('formAjout').addEventListener('submit', async (e) => {
-  e.preventDefault();
-
-  if (!peutModifier()) return;
 
   synchroniserContenuBlocs();
 
@@ -566,23 +551,12 @@ document.getElementById('formAjout').addEventListener('submit', async (e) => {
     libelle,
     numero,
     titre: document.getElementById('titre').value,
-    objectif: document.getElementById('objectif').value || null,
-    competence: document.getElementById('competence').value || null,
-    prerequis: document.getElementById('prerequis').value || null,
-    introduction: document.getElementById('introduction').value || null,
-    contenu: document.getElementById('contenu').value || null,
-    exemples: document.getElementById('exemples').value || null,
-    resume: document.getElementById('resume').value || null,
-    a_retenir: document.getElementById('aRetenir').value || null,
-    attention: document.getElementById('attention').value || null,
-    avertissement: document.getElementById('avertissement').value || null,
     statut: document.getElementById('statut').value,
     ordre: parseInt(document.getElementById('ordre').value)
   };
 
   let resultat;
-
-    let idSeanceTraitee = null;
+  let idSeanceTraitee = null;
 
   if (seanceEnEdition) {
     const cible = resoudreCibleSeance(classesChoisies[0], nomMatiere, nomSM, nomUD, nomSA);
@@ -622,7 +596,7 @@ document.getElementById('formAjout').addEventListener('submit', async (e) => {
       return;
     }
 
-        resultat = await supabaseClient.from('seances').insert(lignes).select();
+    resultat = await supabaseClient.from('seances').insert(lignes).select();
     if (resultat.data && resultat.data.length > 0) {
       idSeanceTraitee = resultat.data[0].id;
     }
@@ -636,12 +610,11 @@ document.getElementById('formAjout').addEventListener('submit', async (e) => {
     }
   }
 
-    if (resultat.error) {
+  if (resultat.error) {
     messageForm.textContent = "Erreur : " + resultat.error.message;
     return;
   }
 
-  // Sauvegarde les blocs de contenu enrichi (supprime les anciens, réinsère les actuels)
   if (idSeanceTraitee) {
     await supabaseClient.from('seance_blocs').delete().eq('seance_id', idSeanceTraitee);
     if (blocsActuels.length > 0) {
