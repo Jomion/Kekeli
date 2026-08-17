@@ -5,7 +5,10 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gestion des séances - KEKELI</title>
   <link rel="stylesheet" href="../../css/style.css">
-  <link rel="stylesheet" href="../../css/admin.css">
+    <link rel="stylesheet" href="../../css/admin.css">
+  <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
+  <link rel="stylesheet" href="../../css/editeur-blocs.css">
+</head>
 </head>
 <body>
 
@@ -94,6 +97,28 @@
       <label for="avertissement">Avertissement</label>
       <textarea id="avertissement" rows="2"></textarea>
 
+      <div style="margin-top:20px;padding-top:16px;border-top:2px solid var(--bordure);">
+        <label style="font-size:16px;">📝 Contenu détaillé (blocs)</label>
+        <p style="font-size:13px;color:var(--texte-gris);margin-bottom:12px;">Ajoute des blocs de contenu enrichi pour structurer la leçon (optionnel, en complément des champs ci-dessus).</p>
+
+        <div id="listeBlocs"></div>
+
+        <div style="display:flex;gap:8px;margin-top:12px;flex-wrap:wrap;">
+          <select id="typeNouveauBloc" style="padding:10px;border:1px solid var(--bordure);border-radius:8px;flex:1;min-width:160px;">
+            <option value="texte">Texte</option>
+            <option value="definition">Définition</option>
+            <option value="regle">Règle</option>
+            <option value="exemple">Exemple</option>
+            <option value="a_retenir">À retenir</option>
+            <option value="astuce">Astuce</option>
+            <option value="attention_bloc">Attention</option>
+          </select>
+          <button type="button" id="btnAjouterBloc" class="btn-secondaire">➕ Ajouter un bloc</button>
+        </div>
+
+        <button type="button" id="btnPrevisualiser" class="btn-secondaire" style="margin-top:10px;">👁️ Prévisualiser</button>
+      </div>
+
       <label for="statut">Statut</label>
       <select id="statut">
         <option value="brouillon">Brouillon</option>
@@ -177,7 +202,9 @@
   <script src="../../js/config.js"></script>
   <script src="../../js/supabaseClient.js"></script>
   <script src="../../js/auth.js"></script>
-  <script src="../../js/pages/admin-seances.js?v=5"></script>
+    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
+  <script src="../../js/pages/editeur-blocs.js"></script>
+  <script src="../../js/pages/admin-seances.js?v=8"></script>
 
 </body>
 </html>
