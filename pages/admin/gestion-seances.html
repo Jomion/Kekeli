@@ -5,10 +5,9 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>Gestion des séances - KEKELI</title>
   <link rel="stylesheet" href="../../css/style.css">
-    <link rel="stylesheet" href="../../css/admin.css">
+  <link rel="stylesheet" href="../../css/admin.css">
   <link href="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.snow.css" rel="stylesheet">
   <link rel="stylesheet" href="../../css/editeur-blocs.css">
-</head>
 </head>
 <body>
 
@@ -67,39 +66,9 @@
       <label for="titre">Titre</label>
       <input type="text" id="titre" placeholder="Ex: Le présent de l'indicatif" required>
 
-      <label for="objectif">Objectif</label>
-      <textarea id="objectif" rows="2"></textarea>
-
-      <label for="competence">Compétence</label>
-      <textarea id="competence" rows="2"></textarea>
-
-      <label for="prerequis">Prérequis</label>
-      <textarea id="prerequis" rows="2"></textarea>
-
-      <label for="introduction">Introduction</label>
-      <textarea id="introduction" rows="3"></textarea>
-
-      <label for="contenu">Contenu de la leçon</label>
-      <textarea id="contenu" rows="6"></textarea>
-
-      <label for="exemples">Exemples</label>
-      <textarea id="exemples" rows="3"></textarea>
-
-      <label for="resume">Résumé</label>
-      <textarea id="resume" rows="3"></textarea>
-
-      <label for="aRetenir">À retenir</label>
-      <textarea id="aRetenir" rows="2"></textarea>
-
-      <label for="attention">Attention</label>
-      <textarea id="attention" rows="2"></textarea>
-
-      <label for="avertissement">Avertissement</label>
-      <textarea id="avertissement" rows="2"></textarea>
-
       <div style="margin-top:20px;padding-top:16px;border-top:2px solid var(--bordure);">
-        <label style="font-size:16px;">📝 Contenu détaillé (blocs)</label>
-        <p style="font-size:13px;color:var(--texte-gris);margin-bottom:12px;">Ajoute des blocs de contenu enrichi pour structurer la leçon (optionnel, en complément des champs ci-dessus).</p>
+        <label style="font-size:16px;">📝 Contenu de la leçon</label>
+        <p style="font-size:13px;color:var(--texte-gris);margin-bottom:12px;">Construis la leçon bloc par bloc (Définition, Texte, Exemple, À retenir, Astuce...).</p>
 
         <div id="listeBlocs"></div>
 
@@ -119,7 +88,7 @@
         <button type="button" id="btnPrevisualiser" class="btn-secondaire" style="margin-top:10px;">👁️ Prévisualiser</button>
       </div>
 
-      <label for="statut">Statut</label>
+      <label for="statut" style="margin-top:20px;">Statut</label>
       <select id="statut">
         <option value="brouillon">Brouillon</option>
         <option value="en_attente">En attente de validation</option>
@@ -195,7 +164,8 @@
     <div id="listeSeances" class="admin-liste">Chargement...</div>
 
   </main>
-    <div id="modalPrevisualisation" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:500;overflow-y:auto;">
+
+  <div id="modalPrevisualisation" style="display:none;position:fixed;inset:0;background:rgba(0,0,0,0.6);z-index:500;overflow-y:auto;">
     <div style="background:white;max-width:700px;margin:20px auto;border-radius:12px;padding:20px;position:relative;">
       <button type="button" id="btnFermerPreview" style="position:absolute;top:12px;right:12px;background:none;border:none;font-size:24px;cursor:pointer;">✕</button>
       <div id="contenuPreview"></div>
@@ -208,9 +178,9 @@
   <script src="../../js/config.js"></script>
   <script src="../../js/supabaseClient.js"></script>
   <script src="../../js/auth.js"></script>
-    <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
   <script src="../../js/pages/editeur-blocs.js"></script>
-  <script src="../../js/pages/admin-seances.js?v=8"></script>
+  <script src="../../js/pages/admin-seances.js?v=9"></script>
 
 </body>
 </html>
