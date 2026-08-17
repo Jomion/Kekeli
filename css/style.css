@@ -151,7 +151,7 @@ a {
     grid-template-columns: repeat(6, 1fr);
   }
 }
-/* ===== Bande lumineuse animée (accueil) ===== */
+/* ===== Bande lumineuse animée (accueil) — boucle continue ===== */
 .bande-lumiere {
   position: relative;
   width: 100%;
@@ -171,31 +171,34 @@ a {
   width: 0;
   transform: translateX(-50%);
   background: radial-gradient(ellipse at center, rgba(255,255,255,0.95) 0%, rgba(255,255,255,0.3) 40%, rgba(255,255,255,0) 75%);
-  animation: grandirLumiere 2.2s ease-out forwards;
+  animation: grandirLumiere 4s ease-in-out infinite;
 }
 
 .bande-lumiere .slogan-anime {
   position: relative;
   z-index: 2;
-  color: #ffffff;
+  color: #9d174d;
+  font-weight: 600;
   font-style: italic;
   font-size: 15px;
   letter-spacing: 0.5px;
   opacity: 0;
   text-align: center;
   padding: 0 16px;
-  animation: apparaitreSlogan 1s ease-in forwards;
-  animation-delay: 1.8s;
+  animation: apparaitreSlogan 4s ease-in-out infinite;
 }
 
 @keyframes grandirLumiere {
   0% { width: 0; }
+  60% { width: 140%; }
   100% { width: 140%; }
 }
 
 @keyframes apparaitreSlogan {
-  0% { opacity: 0; transform: translateY(4px); }
-  100% { opacity: 1; transform: translateY(0); }
+  0% { opacity: 0; }
+  55% { opacity: 0; }
+  75% { opacity: 1; }
+  100% { opacity: 1; }
 }
 
 @media (min-width: 768px) {
