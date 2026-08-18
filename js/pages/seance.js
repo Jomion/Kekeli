@@ -200,33 +200,15 @@ async function chargerSeance() {
     `;
   }
 
-    const aDuContenu = (htmlBlocs && htmlBlocs.trim() !== '') || (htmlAnciensChamps && htmlAnciensChamps.replace(/\s/g, '') !== '');
-
-  container.innerHTML = `
+      container.innerHTML = `
     <p style="color:var(--texte-gris);font-size:13px;margin-bottom:2px;">${filAriane}</p>
     <p style="color:var(--texte-gris);font-size:13px;margin-bottom:4px;">${libelleAffiche}</p>
-    <h1 style="font-size:22px;color:var(--bleu-fonce);margin-bottom:16px;">${seance.titre}</h1>
+    <h1 style="font-size:22px;color:var(--bleu-fonce);margin-bottom:20px;">${seance.titre}</h1>
 
-    ${aDuContenu ? `
-      <button type="button" id="btnToggleContenuSeance" class="btn-secondaire" style="margin-bottom:16px;">▾ Masquer le contenu de la leçon</button>
-      <div id="zoneContenuSeance">
-        ${htmlBlocs}
-        ${htmlAnciensChamps}
-      </div>
-    ` : ''}
+    ${htmlBlocs}
+    ${htmlAnciensChamps}
 
     ${sectionExercices}
   `;
-
-  const btnToggle = document.getElementById('btnToggleContenuSeance');
-  if (btnToggle) {
-    btnToggle.addEventListener('click', () => {
-      const zone = document.getElementById('zoneContenuSeance');
-      const estMasque = zone.style.display === 'none';
-      zone.style.display = estMasque ? 'block' : 'none';
-      btnToggle.textContent = estMasque ? '▾ Masquer le contenu de la leçon' : '▸ Afficher le contenu de la leçon';
-    });
-  }
 }
-
 chargerSeance();
