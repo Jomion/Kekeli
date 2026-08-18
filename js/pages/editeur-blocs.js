@@ -83,21 +83,35 @@ function construireCorpsBloc(bloc) {
     `;
   }
 
-  if (bloc.type === 'tableau') {
-    const lignes = bloc.contenu.lignes || [['', ''], ['', '']];
-    let html = '<table class="bloc-tableau-editeur"><tbody>';
+    if (bloc.type === 'tableau') {
+    const lignes = bloc.contenu.lignes || [
+      [{ texte: '', couleur: '', colspan: 1, centre: false }, { texte: '', couleur: '', colspan: 1, centre: false }],
+      [{ texte: '', couleur: '', colspan: 1, centre: false }, { texte: '', couleur: '', colspan: 1, centre: false }]
+    ];
+    if (bloc.contenu.bordures === undefined) bloc.contenu.bordures = true;
+
+    let html = `<div class="bloc-tableau-actions">
+      <button type="button" class="btn-secondaire btn-toggle-bordures">${bloc.contenu.bordures ? '🔲 Masquer bordures' : '⬜ Afficher bordures'}</button>
+      <button type="button" class="btn-secondaire btn-ajouter-ligne">➕ Ligne</button>
+      <button type="button" class="btn-secondaire btn-ajouter-colonne">➕ Colonne</button>
+    </div>`;
+    html += `<table class="bloc-tableau-editeur ${bloc.contenu.bordures ? '' : 'sans-bordures'}"><tbody>`;
     lignes.forEach((ligne, li) => {
       html += '<tr>';
       ligne.forEach((cellule, ci) => {
-        html += `<td><input type="text" class="champ-cellule-tableau" data-ligne="${li}" data-colonne="${ci}" value="${cellule || ''}"></td>`;
+        if (!cellule) return;
+        html += `<td colspan="${cellule.colspan || 1}" style="background:${cellule.couleur || ''};">
+          <input type="text" class="champ-cellule-tableau" data-ligne="${li}" data-colonne="${ci}" value="${cellule.texte || ''}" style="text-align:${cellule.centre ? 'center' : 'left'};">
+          <div class="bloc-cellule-mini-actions">
+            <input type="color" class="champ-couleur-cellule" data-ligne="${li}" data-colonne="${ci}" value="${cellule.couleur || '#ffffff'}" title="Couleur de la cellule">
+            <button type="button" class="btn-mini-centrer" data-ligne="${li}" data-colonne="${ci}" title="Centrer le texte">↔️</button>
+            <button type="button" class="btn-mini-fusionner" data-ligne="${li}" data-colonne="${ci}" title="Fusionner avec la cellule de droite">⇄</button>
+          </div>
+        </td>`;
       });
       html += '</tr>';
     });
     html += '</tbody></table>';
-    html += `<div class="bloc-tableau-actions">
-      <button type="button" class="btn-secondaire btn-ajouter-ligne">➕ Ligne</button>
-      <button type="button" class="btn-secondaire btn-ajouter-colonne">➕ Colonne</button>
-    </div>`;
     return html;
   }
 
@@ -209,29 +223,64 @@ async function rendreListeBlocs() {
     }
 
     // Tableau : cellules + ajout ligne/colonne
+        // Tableau : cellules + couleur + fusion + centrage + bordures
     const tableauEl = div.querySelector('.bloc-tableau-editeur');
     if (tableauEl) {
-      if (!bloc.contenu.lignes) bloc.contenu.lignes = [['', ''], ['', '']];
-
       div.querySelectorAll('.champ-cellule-tableau').forEach(input => {
         input.addEventListener('input', (e) => {
           const li = parseInt(e.target.dataset.ligne);
           const ci = parseInt(e.target.dataset.colonne);
-          bloc.contenu.lignes[li][ci] = e.target.value;
+          bloc.contenu.lignes[li][ci].texte = e.target.value;
         });
+      });
+
+      div.querySelectorAll('.champ-couleur-cellule').forEach(input => {
+        input.addEventListener('input', (e) => {
+          const li = parseInt(e.target.dataset.ligne);
+          const ci = parseInt(e.target.dataset.colonne);
+          bloc.contenu.lignes[li][ci].couleur = e.target.value;
+          e.target.closest('td').style.background = e.target.value;
+        });
+      });
+
+      div.querySelectorAll('.btn-mini-centrer').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const li = parseInt(e.target.dataset.ligne);
+          const ci = parseInt(e.target.dataset.colonne);
+          bloc.contenu.lignes[li][ci].centre = !bloc.contenu.lignes[li][ci].centre;
+          rendreListeBlocs();
+        });
+      });
+
+      div.querySelectorAll('.btn-mini-fusionner').forEach(btn => {
+        btn.addEventListener('click', (e) => {
+          const li = parseInt(e.target.dataset.ligne);
+          const ci = parseInt(e.target.dataset.colonne);
+          const ligne = bloc.contenu.lignes[li];
+          if (ci + 1 < ligne.length && ligne[ci + 1]) {
+            ligne[ci].colspan = (ligne[ci].colspan || 1) + (ligne[ci + 1].colspan || 1);
+            ligne[ci].texte = (ligne[ci].texte || '') + ' ' + (ligne[ci + 1].texte || '');
+            ligne[ci + 1] = null;
+          }
+          rendreListeBlocs();
+        });
+      });
+
+      div.querySelector('.btn-toggle-bordures').addEventListener('click', () => {
+        bloc.contenu.bordures = !bloc.contenu.bordures;
+        rendreListeBlocs();
       });
 
       div.querySelector('.btn-ajouter-ligne').addEventListener('click', () => {
         const nbColonnes = bloc.contenu.lignes[0].length;
-        bloc.contenu.lignes.push(new Array(nbColonnes).fill(''));
+        bloc.contenu.lignes.push(Array.from({ length: nbColonnes }, () => ({ texte: '', couleur: '', colspan: 1, centre: false })));
         rendreListeBlocs();
       });
       div.querySelector('.btn-ajouter-colonne').addEventListener('click', () => {
-        bloc.contenu.lignes.forEach(ligne => ligne.push(''));
+        bloc.contenu.lignes.forEach(ligne => ligne.push({ texte: '', couleur: '', colspan: 1, centre: false }));
         rendreListeBlocs();
       });
     }
-
     // Exercice : charge la liste des exercices disponibles
     const selectExercice = div.querySelector('.champ-select-exercice');
     if (selectExercice) {
@@ -351,12 +400,13 @@ function construireHtmlBloc(bloc) {
     return `<div class="rendu-bloc rendu-bloc-audio"><audio controls src="${c.url}"></audio></div>`;
   }
 
-  if (bloc.type === 'tableau') {
+    if (bloc.type === 'tableau') {
     if (!c.lignes) return '';
-    const html = c.lignes.map(ligne => '<tr>' + ligne.map(cell => `<td>${cell || ''}</td>`).join('') + '</tr>').join('');
-    return `<div class="rendu-bloc rendu-bloc-tableau"><table>${html}</table></div>`;
+    const html = c.lignes.map(ligne => '<tr>' + ligne.filter(cell => cell).map(cell =>
+      `<td colspan="${cell.colspan || 1}" style="background:${cell.couleur || ''};text-align:${cell.centre ? 'center' : 'left'};">${cell.texte || ''}</td>`
+    ).join('') + '</tr>').join('');
+    return `<div class="rendu-bloc rendu-bloc-tableau"><table class="${c.bordures === false ? 'sans-bordures' : ''}">${html}</table></div>`;
   }
-
   if (bloc.type === 'exercice') {
     if (!c.exerciceId) return '';
     return `<div class="rendu-bloc rendu-bloc-exercice"><a href="#">✏️ Exercice associé (aperçu — lien actif une fois publié)</a></div>`;
