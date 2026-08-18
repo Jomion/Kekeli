@@ -33,7 +33,8 @@
 
 .bloc-editeur-actions button {
   background: white;
-  border: 1px solid var(--bordure);
+  border: 1px solid var(--bleu-principal);
+  color: var(--bleu-principal);
   border-radius: 6px;
   padding: 4px 8px;
   font-size: 13px;
@@ -59,8 +60,12 @@
   margin-bottom: 20px;
 }
 
-.rendu-bloc-texte {
-  line-height: 1.7;
+.rendu-bloc-texte,
+.rendu-bloc-resume {
+  background: #f8fafc;
+  border: 1px solid var(--bordure);
+  padding: 14px 16px;
+  border-radius: 8px;
 }
 
 .rendu-bloc-definition,
@@ -93,6 +98,16 @@
   border-radius: 8px;
 }
 
+.rendu-bloc-image,
+.rendu-bloc-video,
+.rendu-bloc-audio,
+.rendu-bloc-tableau {
+  background: #f8fafc;
+  border: 1px solid var(--bordure);
+  padding: 14px 16px;
+  border-radius: 8px;
+}
+
 .rendu-bloc-label {
   font-weight: 700;
   font-size: 13px;
@@ -102,6 +117,8 @@
   display: block;
 }
 
+.rendu-bloc-texte .rendu-bloc-label,
+.rendu-bloc-resume .rendu-bloc-label { color: var(--texte-fonce); }
 .rendu-bloc-definition .rendu-bloc-label,
 .rendu-bloc-regle .rendu-bloc-label,
 .rendu-bloc-astuce .rendu-bloc-label { color: var(--bleu-principal); }
@@ -112,6 +129,7 @@
 .rendu-bloc .ql-editor {
   padding: 0;
 }
+
 /* ===== Blocs Phase 2 : édition ===== */
 .bloc-champ {
   width: 100%;
@@ -138,19 +156,51 @@
 .bloc-tableau-editeur td {
   border: 1px solid var(--bordure);
   padding: 4px;
+  vertical-align: top;
 }
 
-.bloc-tableau-editeur input {
+.bloc-tableau-editeur.sans-bordures td {
+  border: none;
+}
+
+.bloc-tableau-editeur input[type="text"] {
   width: 100%;
   border: none;
   padding: 6px;
   font-size: 14px;
+  box-sizing: border-box;
+}
+
+.bloc-cellule-mini-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+  padding: 0 4px 4px;
+}
+
+.bloc-cellule-mini-actions input[type="color"] {
+  width: 24px;
+  height: 24px;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.bloc-cellule-mini-actions button {
+  background: white;
+  border: 1px solid var(--bordure);
+  border-radius: 4px;
+  font-size: 11px;
+  padding: 2px 5px;
+  cursor: pointer;
 }
 
 .bloc-tableau-actions {
   display: flex;
   gap: 8px;
   margin-bottom: 10px;
+  flex-wrap: wrap;
 }
 
 .bloc-upload-statut {
@@ -185,6 +235,10 @@
   border-collapse: collapse;
 }
 
+.rendu-bloc-tableau table.sans-bordures td {
+  border: none;
+}
+
 .rendu-bloc-tableau td {
   border: 1px solid var(--bordure);
   padding: 8px;
@@ -200,31 +254,4 @@
   text-decoration: none;
   color: var(--bleu-fonce);
   font-weight: 600;
-}
-/* ===== Tableau : couleur, fusion, bordures, centrage ===== */
-.bloc-tableau-editeur.sans-bordures td { border: none; }
-.rendu-bloc-tableau table.sans-bordures td { border: none; }
-
-.bloc-cellule-mini-actions {
-  display: flex;
-  align-items: center;
-  gap: 4px;
-  margin-top: 4px;
-}
-
-.bloc-cellule-mini-actions input[type="color"] {
-  width: 24px;
-  height: 24px;
-  border: none;
-  padding: 0;
-  cursor: pointer;
-}
-
-.bloc-cellule-mini-actions button {
-  background: white;
-  border: 1px solid var(--bordure);
-  border-radius: 4px;
-  font-size: 11px;
-  padding: 2px 5px;
-  cursor: pointer;
 }
