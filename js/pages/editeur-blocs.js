@@ -1,9 +1,10 @@
-// Éditeur de blocs de contenu riche (Phase 1 + Phase 2)
+// Éditeur de blocs de contenu riche (Phase 1 + Phase 2 + corrections)
 
 let blocsActuels = [];
 let compteurBlocTemp = 0;
 
 const LABELS_BLOCS = {
+  resume: '📄 Résumé',
   texte: '📝 Texte',
   definition: '📘 Définition',
   regle: '📏 Règle',
@@ -19,7 +20,8 @@ const LABELS_BLOCS = {
   ressource: '📎 Ressource'
 };
 
-const TYPES_RICHTEXT = ['texte', 'definition', 'regle', 'exemple', 'a_retenir', 'astuce', 'attention_bloc'];
+const TYPES_RICHTEXT = ['resume', 'texte', 'definition', 'regle', 'exemple', 'a_retenir', 'astuce', 'attention_bloc'];
+const TYPES_AVEC_NOM_PERSO = ['resume', 'texte'];
 
 function genererIdTemp() {
   compteurBlocTemp++;
@@ -55,7 +57,12 @@ async function uploaderFichier(file, dossier) {
 
 function construireCorpsBloc(bloc) {
   if (TYPES_RICHTEXT.includes(bloc.type)) {
-    return `<div class="zone-quill-${bloc.id}"></div>`;
+    let html = '';
+    if (TYPES_AVEC_NOM_PERSO.includes(bloc.type)) {
+      html += `<input type="text" class="bloc-champ champ-nom-perso" placeholder="Nom du bloc affiché au public (facultatif)" value="${bloc.contenu.nomPersonnalise || ''}" style="margin-bottom:8px;">`;
+    }
+    html += `<div class="zone-quill-${bloc.id}"></div>`;
+    return html;
   }
 
   if (bloc.type === 'image') {
@@ -83,12 +90,17 @@ function construireCorpsBloc(bloc) {
     `;
   }
 
-    if (bloc.type === 'tableau') {
-    const lignes = bloc.contenu.lignes || [
-      [{ texte: '', couleur: '', colspan: 1, centre: false }, { texte: '', couleur: '', colspan: 1, centre: false }],
-      [{ texte: '', couleur: '', colspan: 1, centre: false }, { texte: '', couleur: '', colspan: 1, centre: false }]
-    ];
+  if (bloc.type === 'tableau') {
+    // IMPORTANT : on affecte bien lignes dans bloc.contenu.lignes (c'était le bug précédent)
+    if (!bloc.contenu.lignes) {
+      bloc.contenu.lignes = [
+        [{ texte: '', couleur: '', colspan: 1, centre: false }, { texte: '', couleur: '', colspan: 1, centre: false }],
+        [{ texte: '', couleur: '', colspan: 1, centre: false }, { texte: '', couleur: '', colspan: 1, centre: false }]
+      ];
+    }
     if (bloc.contenu.bordures === undefined) bloc.contenu.bordures = true;
+
+    const lignes = bloc.contenu.lignes;
 
     let html = `<div class="bloc-tableau-actions">
       <button type="button" class="btn-secondaire btn-toggle-bordures">${bloc.contenu.bordures ? '🔲 Masquer bordures' : '⬜ Afficher bordures'}</button>
@@ -177,6 +189,13 @@ async function rendreListeBlocs() {
         quill.clipboard.dangerouslyPasteHTML(bloc.contenu.html);
       }
       bloc.instanceQuill = quill;
+
+      const champNomPerso = div.querySelector('.champ-nom-perso');
+      if (champNomPerso) {
+        champNomPerso.addEventListener('input', (e) => {
+          bloc.contenu.nomPersonnalise = e.target.value;
+        });
+      }
     }
 
     // Image : upload + légende
@@ -222,8 +241,7 @@ async function rendreListeBlocs() {
       });
     }
 
-    // Tableau : cellules + ajout ligne/colonne
-        // Tableau : cellules + couleur + fusion + centrage + bordures
+    // Tableau : cellules + couleur + fusion + centrage + bordures
     const tableauEl = div.querySelector('.bloc-tableau-editeur');
     if (tableauEl) {
       div.querySelectorAll('.champ-cellule-tableau').forEach(input => {
@@ -245,8 +263,8 @@ async function rendreListeBlocs() {
 
       div.querySelectorAll('.btn-mini-centrer').forEach(btn => {
         btn.addEventListener('click', (e) => {
-          const li = parseInt(e.target.dataset.ligne);
-          const ci = parseInt(e.target.dataset.colonne);
+          const li = parseInt(e.currentTarget.dataset.ligne);
+          const ci = parseInt(e.currentTarget.dataset.colonne);
           bloc.contenu.lignes[li][ci].centre = !bloc.contenu.lignes[li][ci].centre;
           rendreListeBlocs();
         });
@@ -254,8 +272,8 @@ async function rendreListeBlocs() {
 
       div.querySelectorAll('.btn-mini-fusionner').forEach(btn => {
         btn.addEventListener('click', (e) => {
-          const li = parseInt(e.target.dataset.ligne);
-          const ci = parseInt(e.target.dataset.colonne);
+          const li = parseInt(e.currentTarget.dataset.ligne);
+          const ci = parseInt(e.currentTarget.dataset.colonne);
           const ligne = bloc.contenu.lignes[li];
           if (ci + 1 < ligne.length && ligne[ci + 1]) {
             ligne[ci].colspan = (ligne[ci].colspan || 1) + (ligne[ci + 1].colspan || 1);
@@ -266,21 +284,34 @@ async function rendreListeBlocs() {
         });
       });
 
-      div.querySelector('.btn-toggle-bordures').addEventListener('click', () => {
-        bloc.contenu.bordures = !bloc.contenu.bordures;
-        rendreListeBlocs();
-      });
+      const btnBordures = div.querySelector('.btn-toggle-bordures');
+      if (btnBordures) {
+        btnBordures.addEventListener('click', () => {
+          bloc.contenu.bordures = !bloc.contenu.bordures;
+          rendreListeBlocs();
+        });
+      }
 
-      div.querySelector('.btn-ajouter-ligne').addEventListener('click', () => {
-        const nbColonnes = bloc.contenu.lignes[0].length;
-        bloc.contenu.lignes.push(Array.from({ length: nbColonnes }, () => ({ texte: '', couleur: '', colspan: 1, centre: false })));
-        rendreListeBlocs();
-      });
-      div.querySelector('.btn-ajouter-colonne').addEventListener('click', () => {
-        bloc.contenu.lignes.forEach(ligne => ligne.push({ texte: '', couleur: '', colspan: 1, centre: false }));
-        rendreListeBlocs();
-      });
+      const btnAjouterLigne = div.querySelector('.btn-ajouter-ligne');
+      if (btnAjouterLigne) {
+        btnAjouterLigne.addEventListener('click', () => {
+          const nbColonnes = bloc.contenu.lignes[0].length;
+          bloc.contenu.lignes.push(Array.from({ length: nbColonnes }, () => ({ texte: '', couleur: '', colspan: 1, centre: false })));
+          rendreListeBlocs();
+        });
+      }
+
+      const btnAjouterColonne = div.querySelector('.btn-ajouter-colonne');
+      if (btnAjouterColonne) {
+        btnAjouterColonne.addEventListener('click', () => {
+          bloc.contenu.lignes.forEach(ligne => {
+            if (ligne) ligne.push({ texte: '', couleur: '', colspan: 1, centre: false });
+          });
+          rendreListeBlocs();
+        });
+      }
     }
+
     // Exercice : charge la liste des exercices disponibles
     const selectExercice = div.querySelector('.champ-select-exercice');
     if (selectExercice) {
@@ -314,7 +345,7 @@ async function rendreListeBlocs() {
 function synchroniserContenuBlocs() {
   blocsActuels.forEach(bloc => {
     if (bloc.instanceQuill) {
-      bloc.contenu = { html: bloc.instanceQuill.root.innerHTML };
+      bloc.contenu.html = bloc.instanceQuill.root.innerHTML;
     }
   });
 }
@@ -369,6 +400,7 @@ function chargerBlocsExistants(liste) {
 // ===== Rendu pour la prévisualisation =====
 
 const LABELS_BLOCS_RENDU = {
+  resume: '📄 Résumé',
   definition: '📘 Définition', regle: '📏 Règle', exemple: '💡 Exemple',
   a_retenir: '⭐ À retenir', astuce: '🔑 Astuce', attention_bloc: '⚠️ Attention'
 };
@@ -378,8 +410,9 @@ function construireHtmlBloc(bloc) {
 
   if (TYPES_RICHTEXT.includes(bloc.type)) {
     const html = c.html || '';
-    if (bloc.type === 'texte') {
-      return `<div class="rendu-bloc rendu-bloc-texte"><div class="ql-editor">${html}</div></div>`;
+    if (bloc.type === 'texte' || bloc.type === 'resume') {
+      const label = c.nomPersonnalise ? c.nomPersonnalise : (bloc.type === 'resume' ? 'Résumé' : null);
+      return `<div class="rendu-bloc rendu-bloc-${bloc.type}">${label ? `<span class="rendu-bloc-label">${label}</span>` : ''}<div class="ql-editor">${html}</div></div>`;
     }
     return `<div class="rendu-bloc rendu-bloc-${bloc.type}"><span class="rendu-bloc-label">${LABELS_BLOCS_RENDU[bloc.type]}</span><div class="ql-editor">${html}</div></div>`;
   }
@@ -400,13 +433,14 @@ function construireHtmlBloc(bloc) {
     return `<div class="rendu-bloc rendu-bloc-audio"><audio controls src="${c.url}"></audio></div>`;
   }
 
-    if (bloc.type === 'tableau') {
+  if (bloc.type === 'tableau') {
     if (!c.lignes) return '';
     const html = c.lignes.map(ligne => '<tr>' + ligne.filter(cell => cell).map(cell =>
       `<td colspan="${cell.colspan || 1}" style="background:${cell.couleur || ''};text-align:${cell.centre ? 'center' : 'left'};">${cell.texte || ''}</td>`
     ).join('') + '</tr>').join('');
     return `<div class="rendu-bloc rendu-bloc-tableau"><table class="${c.bordures === false ? 'sans-bordures' : ''}">${html}</table></div>`;
   }
+
   if (bloc.type === 'exercice') {
     if (!c.exerciceId) return '';
     return `<div class="rendu-bloc rendu-bloc-exercice"><a href="#">✏️ Exercice associé (aperçu — lien actif une fois publié)</a></div>`;
