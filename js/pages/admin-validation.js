@@ -180,30 +180,46 @@ async function chargerListe() {
     container.appendChild(ligne);
   });
 
-  document.querySelectorAll('.btn-voir').forEach(btn => {
-    btn.addEventListener('click', () => afficherApercu(btn.dataset.id, items));
+    document.querySelectorAll('.btn-voir').forEach(btn => {
+    btn.addEventListener('click', async () => await afficherApercu(btn.dataset.id, items));
   });
   document.querySelectorAll('.btn-valider').forEach(btn => {
     btn.addEventListener('click', () => validerItem(btn.dataset.id));
   });
 }
 
-function afficherApercu(id, liste) {
-  const item = liste.find(i => i.id === id);
+async function afficherApercu(id, liste) 
+{  const item = liste.find(i => i.id === id);
   const zone = document.getElementById('apercu-' + id);
   if (!item || !zone) return;
 
   if (zone.style.display !== 'none') { zone.style.display = 'none'; return; }
 
-  let html = '';
+    let html = '';
   if (typeActuel === 'seances') {
-    html = `
+    const { data: blocsSeance } = await supabaseClient
+      .from('seance_blocs')
+      .select('*')
+      .eq('seance_id', item.id)
+      .order('ordre', { ascending: true });
+
+    const labelsBlocs = { texte: '', definition: '📘 Définition', regle: '📏 Règle', exemple: '💡 Exemple', a_retenir: '⭐ À retenir', astuce: '🔑 Astuce', attention_bloc: '⚠️ Attention' };
+
+    const htmlBlocs = (blocsSeance || []).map(b => {
+      const contenuHtml = b.contenu && b.contenu.html ? b.contenu.html : '';
+      const label = labelsBlocs[b.type] || b.type;
+      return `<div style="margin-bottom:10px;">${label ? `<strong>${label} :</strong>` : ''}${contenuHtml}</div>`;
+    }).join('');
+
+    const htmlAnciens = `
       ${item.objectif ? `<p><strong>Objectif :</strong> ${item.objectif}</p>` : ''}
       ${item.introduction ? `<p><strong>Introduction :</strong> ${item.introduction}</p>` : ''}
       ${item.contenu ? `<p><strong>Contenu :</strong> ${item.contenu}</p>` : ''}
       ${item.exemples ? `<p><strong>Exemples :</strong> ${item.exemples}</p>` : ''}
       ${item.resume ? `<p><strong>Résumé :</strong> ${item.resume}</p>` : ''}
     `;
+
+    html = htmlBlocs + htmlAnciens || '<p>Aucun contenu.</p>';
   } else if (typeActuel === 'exercices') {
     html = `
       <p><strong>Énoncé :</strong> ${item.enonce}</p>
