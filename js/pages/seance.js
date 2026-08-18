@@ -3,9 +3,10 @@
 const paramsSeance = new URLSearchParams(window.location.search);
 const seanceId = paramsSeance.get('id');
 
-const TYPES_RICHTEXT_PUB = ['texte', 'definition', 'regle', 'exemple', 'a_retenir', 'astuce', 'attention_bloc'];
+const TYPES_RICHTEXT_PUB = ['resume', 'texte', 'definition', 'regle', 'exemple', 'a_retenir', 'astuce', 'attention_bloc'];
 
 const LABELS_BLOCS_PUBLIC = {
+  resume: '📄 Résumé',
   definition: '📘 Définition',
   regle: '📏 Règle',
   exemple: '💡 Exemple',
@@ -35,8 +36,10 @@ async function rendreBlocEnrichi(b) {
   if (TYPES_RICHTEXT_PUB.includes(b.type)) {
     const html = c.html || '';
     if (!html || html === '<p><br></p>') return '';
-    if (b.type === 'texte') {
-      return `<div class="rendu-bloc rendu-bloc-texte"><div class="ql-editor">${html}</div></div>`;
+
+    if (b.type === 'texte' || b.type === 'resume') {
+      const label = c.nomPersonnalise ? c.nomPersonnalise : (b.type === 'resume' ? 'Résumé' : null);
+      return `<div class="rendu-bloc rendu-bloc-${b.type}">${label ? `<span class="rendu-bloc-label">${label}</span>` : ''}<div class="ql-editor">${html}</div></div>`;
     }
     return `<div class="rendu-bloc rendu-bloc-${b.type}"><span class="rendu-bloc-label">${LABELS_BLOCS_PUBLIC[b.type]}</span><div class="ql-editor">${html}</div></div>`;
   }
@@ -59,8 +62,10 @@ async function rendreBlocEnrichi(b) {
 
   if (b.type === 'tableau') {
     if (!c.lignes) return '';
-    const html = c.lignes.map(ligne => '<tr>' + ligne.map(cell => `<td>${cell || ''}</td>`).join('') + '</tr>').join('');
-    return `<div class="rendu-bloc rendu-bloc-tableau"><table>${html}</table></div>`;
+    const html = c.lignes.map(ligne => '<tr>' + ligne.filter(cell => cell).map(cell =>
+      `<td colspan="${cell.colspan || 1}" style="background:${cell.couleur || ''};text-align:${cell.centre ? 'center' : 'left'};">${cell.texte || ''}</td>`
+    ).join('') + '</tr>').join('');
+    return `<div class="rendu-bloc rendu-bloc-tableau"><table class="${c.bordures === false ? 'sans-bordures' : ''}">${html}</table></div>`;
   }
 
   if (b.type === 'exercice') {
