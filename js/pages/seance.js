@@ -1,7 +1,17 @@
-// Page publique : affichage du contenu complet d'une séance
+// Page publique : affichage du contenu complet d'une séance (champs classiques + blocs enrichis)
 
 const paramsSeance = new URLSearchParams(window.location.search);
 const seanceId = paramsSeance.get('id');
+
+const LABELS_BLOCS_PUBLIC = {
+  texte: null, // pas de label affiché pour le texte simple
+  definition: '📘 Définition',
+  regle: '📏 Règle',
+  exemple: '💡 Exemple',
+  a_retenir: '⭐ À retenir',
+  astuce: '🔑 Astuce',
+  attention_bloc: '⚠️ Attention'
+};
 
 function bloc(titre, contenu) {
   if (!contenu) return '';
@@ -11,7 +21,20 @@ function bloc(titre, contenu) {
   </section>`;
 }
 
-// Reconstitue le chemin complet (Matière > Sous-matière > Unité > SA) en remontant les relations
+function rendreBlocEnrichi(b) {
+  const html = b.contenu && b.contenu.html ? b.contenu.html : '';
+  if (!html || html === '<p><br></p>') return '';
+
+  if (b.type === 'texte') {
+    return `<div class="rendu-bloc rendu-bloc-texte"><div class="ql-editor">${html}</div></div>`;
+  }
+  const label = LABELS_BLOCS_PUBLIC[b.type] || b.type;
+  return `<div class="rendu-bloc rendu-bloc-${b.type}">
+    <span class="rendu-bloc-label">${label}</span>
+    <div class="ql-editor">${html}</div>
+  </div>`;
+}
+
 async function construireFilAriane(seance) {
   const parties = [];
 
@@ -87,6 +110,29 @@ async function chargerSeance() {
   const libelleAffiche = `${seance.libelle === 'seance' ? 'Séance' : 'Séquence'} ${seance.numero || ''}`.trim();
   const filAriane = await construireFilAriane(seance);
 
+  // Blocs de contenu enrichi (nouveau système)
+  const { data: blocs } = await supabaseClient
+    .from('seance_blocs')
+    .select('*')
+    .eq('seance_id', seanceId)
+    .order('ordre', { ascending: true });
+
+  const htmlBlocs = (blocs || []).map(rendreBlocEnrichi).join('');
+
+  // Anciens champs texte (rétrocompatibilité avec les séances créées avant le système de blocs)
+  const htmlAnciensChamps = `
+    ${bloc('Objectif', seance.objectif)}
+    ${bloc('Compétence', seance.competence)}
+    ${bloc('Prérequis', seance.prerequis)}
+    ${bloc('Introduction', seance.introduction)}
+    ${bloc('Contenu', seance.contenu)}
+    ${bloc('Exemples', seance.exemples)}
+    ${bloc('Résumé', seance.resume)}
+    ${bloc('À retenir', seance.a_retenir)}
+    ${bloc('⚠️ Attention', seance.attention)}
+    ${bloc('🚫 Avertissement', seance.avertissement)}
+  `;
+
   const { data: exercices } = await supabaseClient
     .from('exercices')
     .select('id, titre')
@@ -111,16 +157,8 @@ async function chargerSeance() {
     <p style="color:var(--texte-gris);font-size:13px;margin-bottom:4px;">${libelleAffiche}</p>
     <h1 style="font-size:22px;color:var(--bleu-fonce);margin-bottom:20px;">${seance.titre}</h1>
 
-    ${bloc('Objectif', seance.objectif)}
-    ${bloc('Compétence', seance.competence)}
-    ${bloc('Prérequis', seance.prerequis)}
-    ${bloc('Introduction', seance.introduction)}
-    ${bloc('Contenu', seance.contenu)}
-    ${bloc('Exemples', seance.exemples)}
-    ${bloc('Résumé', seance.resume)}
-    ${bloc('À retenir', seance.a_retenir)}
-    ${bloc('⚠️ Attention', seance.attention)}
-    ${bloc('🚫 Avertissement', seance.avertissement)}
+    ${htmlBlocs}
+    ${htmlAnciensChamps}
 
     ${sectionExercices}
   `;
