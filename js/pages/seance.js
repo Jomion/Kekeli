@@ -3,8 +3,9 @@
 const paramsSeance = new URLSearchParams(window.location.search);
 const seanceId = paramsSeance.get('id');
 
+const TYPES_RICHTEXT_PUB = ['texte', 'definition', 'regle', 'exemple', 'a_retenir', 'astuce', 'attention_bloc'];
+
 const LABELS_BLOCS_PUBLIC = {
-  texte: null, // pas de label affiché pour le texte simple
   definition: '📘 Définition',
   regle: '📏 Règle',
   exemple: '💡 Exemple',
@@ -12,6 +13,13 @@ const LABELS_BLOCS_PUBLIC = {
   astuce: '🔑 Astuce',
   attention_bloc: '⚠️ Attention'
 };
+
+function extraireIdYoutubePub(url) {
+  if (!url) return null;
+  const regex = /(?:youtube\.com\/(?:watch\?v=|embed\/)|youtu\.be\/)([a-zA-Z0-9_-]{11})/;
+  const match = url.match(regex);
+  return match ? match[1] : null;
+}
 
 function bloc(titre, contenu) {
   if (!contenu) return '';
@@ -21,18 +29,54 @@ function bloc(titre, contenu) {
   </section>`;
 }
 
-function rendreBlocEnrichi(b) {
-  const html = b.contenu && b.contenu.html ? b.contenu.html : '';
-  if (!html || html === '<p><br></p>') return '';
+async function rendreBlocEnrichi(b) {
+  const c = b.contenu || {};
 
-  if (b.type === 'texte') {
-    return `<div class="rendu-bloc rendu-bloc-texte"><div class="ql-editor">${html}</div></div>`;
+  if (TYPES_RICHTEXT_PUB.includes(b.type)) {
+    const html = c.html || '';
+    if (!html || html === '<p><br></p>') return '';
+    if (b.type === 'texte') {
+      return `<div class="rendu-bloc rendu-bloc-texte"><div class="ql-editor">${html}</div></div>`;
+    }
+    return `<div class="rendu-bloc rendu-bloc-${b.type}"><span class="rendu-bloc-label">${LABELS_BLOCS_PUBLIC[b.type]}</span><div class="ql-editor">${html}</div></div>`;
   }
-  const label = LABELS_BLOCS_PUBLIC[b.type] || b.type;
-  return `<div class="rendu-bloc rendu-bloc-${b.type}">
-    <span class="rendu-bloc-label">${label}</span>
-    <div class="ql-editor">${html}</div>
-  </div>`;
+
+  if (b.type === 'image') {
+    if (!c.url) return '';
+    return `<figure class="rendu-bloc rendu-bloc-image"><img src="${c.url}" loading="lazy">${c.legende ? `<figcaption>${c.legende}</figcaption>` : ''}</figure>`;
+  }
+
+  if (b.type === 'video') {
+    const idYt = extraireIdYoutubePub(c.url);
+    if (!idYt) return '';
+    return `<div class="rendu-bloc rendu-bloc-video"><iframe src="https://www.youtube.com/embed/${idYt}" allowfullscreen></iframe></div>`;
+  }
+
+  if (b.type === 'audio') {
+    if (!c.url) return '';
+    return `<div class="rendu-bloc rendu-bloc-audio"><audio controls src="${c.url}"></audio></div>`;
+  }
+
+  if (b.type === 'tableau') {
+    if (!c.lignes) return '';
+    const html = c.lignes.map(ligne => '<tr>' + ligne.map(cell => `<td>${cell || ''}</td>`).join('') + '</tr>').join('');
+    return `<div class="rendu-bloc rendu-bloc-tableau"><table>${html}</table></div>`;
+  }
+
+  if (b.type === 'exercice') {
+    if (!c.exerciceId) return '';
+    const { data: ex } = await supabaseClient.from('exercices').select('id, titre, enonce, statut').eq('id', c.exerciceId).single();
+    if (!ex || ex.statut !== 'publie') return '';
+    const titreEx = ex.titre || ex.enonce.substring(0, 50) + '...';
+    return `<div class="rendu-bloc rendu-bloc-exercice"><a href="exercice.html?id=${ex.id}">✏️ ${titreEx}</a></div>`;
+  }
+
+  if (b.type === 'ressource') {
+    if (!c.url) return '';
+    return `<div class="rendu-bloc rendu-bloc-ressource"><a href="${c.url}" target="_blank">📎 ${c.titre || 'Ressource'}</a></div>`;
+  }
+
+  return '';
 }
 
 async function construireFilAriane(seance) {
@@ -110,16 +154,15 @@ async function chargerSeance() {
   const libelleAffiche = `${seance.libelle === 'seance' ? 'Séance' : 'Séquence'} ${seance.numero || ''}`.trim();
   const filAriane = await construireFilAriane(seance);
 
-  // Blocs de contenu enrichi (nouveau système)
   const { data: blocs } = await supabaseClient
     .from('seance_blocs')
     .select('*')
     .eq('seance_id', seanceId)
     .order('ordre', { ascending: true });
 
-  const htmlBlocs = (blocs || []).map(rendreBlocEnrichi).join('');
+  const htmlBlocsArray = await Promise.all((blocs || []).map(rendreBlocEnrichi));
+  const htmlBlocs = htmlBlocsArray.join('');
 
-  // Anciens champs texte (rétrocompatibilité avec les séances créées avant le système de blocs)
   const htmlAnciensChamps = `
     ${bloc('Objectif', seance.objectif)}
     ${bloc('Compétence', seance.competence)}
@@ -133,7 +176,7 @@ async function chargerSeance() {
     ${bloc('🚫 Avertissement', seance.avertissement)}
   `;
 
-  const { data: exercices } = await supabaseClient
+  const { data: exercicesLies } = await supabaseClient
     .from('exercices')
     .select('id, titre')
     .eq('seance_id', seanceId)
@@ -141,12 +184,12 @@ async function chargerSeance() {
     .order('ordre', { ascending: true });
 
   let sectionExercices = '';
-  if (exercices && exercices.length > 0) {
+  if (exercicesLies && exercicesLies.length > 0) {
     sectionExercices = `
       <section style="margin-top:24px;padding-top:20px;border-top:1px solid var(--bordure);">
         <h3 style="font-size:15px;color:var(--bleu-fonce);margin-bottom:10px;">Exercices associés</h3>
         <div style="display:flex;flex-direction:column;gap:8px;">
-          ${exercices.map(ex => `<a href="exercice.html?id=${ex.id}" class="admin-ligne" style="text-decoration:none;">${ex.titre || 'Exercice'}</a>`).join('')}
+          ${exercicesLies.map(ex => `<a href="exercice.html?id=${ex.id}" class="admin-ligne" style="text-decoration:none;">${ex.titre || 'Exercice'}</a>`).join('')}
         </div>
       </section>
     `;
