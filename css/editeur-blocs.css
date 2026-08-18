@@ -112,3 +112,92 @@
 .rendu-bloc .ql-editor {
   padding: 0;
 }
+/* ===== Blocs Phase 2 : édition ===== */
+.bloc-champ {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--bordure);
+  border-radius: 8px;
+  font-size: 15px;
+  margin-bottom: 8px;
+  box-sizing: border-box;
+}
+
+.bloc-apercu-media {
+  max-width: 100%;
+  border-radius: 8px;
+  margin-top: 8px;
+}
+
+.bloc-tableau-editeur {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.bloc-tableau-editeur td {
+  border: 1px solid var(--bordure);
+  padding: 4px;
+}
+
+.bloc-tableau-editeur input {
+  width: 100%;
+  border: none;
+  padding: 6px;
+  font-size: 14px;
+}
+
+.bloc-tableau-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+}
+
+.bloc-upload-statut {
+  font-size: 12px;
+  color: var(--texte-gris);
+  margin-top: 6px;
+}
+
+/* ===== Rendu public Phase 2 ===== */
+.rendu-bloc-image img,
+.rendu-bloc-audio audio {
+  max-width: 100%;
+  border-radius: 8px;
+}
+
+.rendu-bloc-image figcaption {
+  font-size: 13px;
+  color: var(--texte-gris);
+  margin-top: 6px;
+  text-align: center;
+}
+
+.rendu-bloc-video iframe {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 8px;
+  border: none;
+}
+
+.rendu-bloc-tableau table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.rendu-bloc-tableau td {
+  border: 1px solid var(--bordure);
+  padding: 8px;
+  font-size: 14px;
+}
+
+.rendu-bloc-exercice a,
+.rendu-bloc-ressource a {
+  display: block;
+  padding: 12px;
+  background: var(--bleu-clair);
+  border-radius: 8px;
+  text-decoration: none;
+  color: var(--bleu-fonce);
+  font-weight: 600;
+}
