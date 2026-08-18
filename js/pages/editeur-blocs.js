@@ -132,11 +132,11 @@ async function rendreListeBlocs() {
       <div class="bloc-editeur-header">
         <span class="bloc-editeur-titre">${LABELS_BLOCS[bloc.type] || bloc.type}</span>
         <div class="bloc-editeur-actions">
-          <button type="button" data-action="haut">↑</button>
-          <button type="button" data-action="bas">↓</button>
-          <button type="button" data-action="reduire">▾</button>
-          <button type="button" data-action="dupliquer">⧉</button>
-          <button type="button" data-action="supprimer">🗑️</button>
+          <button type="button" data-action="haut" title="Monter ce bloc">↑</button>
+          <button type="button" data-action="bas" title="Descendre ce bloc">↓</button>
+          <button type="button" data-action="reduire" title="Réduire / développer">▾</button>
+          <button type="button" data-action="dupliquer" title="Dupliquer ce bloc">⧉</button>
+          <button type="button" data-action="supprimer" title="Supprimer ce bloc">🗑️</button>
         </div>
       </div>
       <div class="bloc-editeur-corps">${construireCorpsBloc(bloc)}</div>
