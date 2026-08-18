@@ -201,3 +201,30 @@
   color: var(--bleu-fonce);
   font-weight: 600;
 }
+/* ===== Tableau : couleur, fusion, bordures, centrage ===== */
+.bloc-tableau-editeur.sans-bordures td { border: none; }
+.rendu-bloc-tableau table.sans-bordures td { border: none; }
+
+.bloc-cellule-mini-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+}
+
+.bloc-cellule-mini-actions input[type="color"] {
+  width: 24px;
+  height: 24px;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.bloc-cellule-mini-actions button {
+  background: white;
+  border: 1px solid var(--bordure);
+  border-radius: 4px;
+  font-size: 11px;
+  padding: 2px 5px;
+  cursor: pointer;
+}
