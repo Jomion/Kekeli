@@ -95,6 +95,16 @@
         <button type="button" id="btnPrevisualiser" class="btn-secondaire" style="margin-top:10px;">👁️ Prévisualiser</button>
       </div>
 
+            <div style="margin-top:20px;padding-top:16px;border-top:2px solid var(--bordure);">
+        <label style="font-size:16px;">🎯 Activités associées</label>
+        <p style="font-size:13px;color:var(--texte-gris);margin-bottom:8px;">Le niveau 🌱 Azɔ̀ví (avec sa correction) est obligatoire avant de publier la séance.</p>
+        <p id="messageStatutNiveaux" style="font-size:13px;font-weight:600;margin-bottom:12px;"></p>
+
+        <div id="listeActivites"></div>
+
+        <button type="button" id="btnAjouterActivite" class="btn-secondaire" style="margin-top:8px;">➕ Ajouter une activité</button>
+      </div>
+
       <label for="statut" style="margin-top:20px;">Statut</label>
       <select id="statut">
         <option value="brouillon">Brouillon</option>
@@ -107,7 +117,6 @@
       <button type="submit">➕ Ajouter</button>
       <p id="messageForm" class="message-erreur"></p>
     </form>
-
     <button type="button" id="btnToggleFiltres" class="btn-secondaire" style="margin-bottom:12px;">🔍 Filtres et tri</button>
 
     <div class="admin-filtre" id="panneauFiltres" style="display:none;">
@@ -186,8 +195,8 @@
   <script src="../../js/supabaseClient.js"></script>
   <script src="../../js/auth.js"></script>
   <script src="https://cdn.jsdelivr.net/npm/quill@2.0.2/dist/quill.js"></script>
-  <script src="../../js/pages/editeur-blocs.js"></script>
-  <script src="../../js/pages/admin-seances.js?v=9"></script>
-
+    <script src="../../js/pages/editeur-blocs.js"></script>
+  <script src="../../js/pages/activites-editeur.js"></script>
+  <script src="../../js/pages/admin-seances.js?v=10"></script>
 </body>
 </html>
