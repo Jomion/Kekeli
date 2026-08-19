@@ -24,14 +24,15 @@
       <select id="matiere" required>
         <option value="">-- Choisir d'abord une/des classe(s) --</option>
       </select>
-      <label for="sousMatiere">Sous-matière (si applicable)</label>
-      <select id="sousMatiere">
-        <option value="">-- Aucune / non applicable --</option>
+
+      <label for="uniteDossier">Unité / Dossier</label>
+      <select id="uniteDossier" required>
+        <option value="">-- Choisir d'abord une matière --</option>
       </select>
 
-      <label for="uniteDossier">Unité / Dossier (si applicable)</label>
-      <select id="uniteDossier">
-        <option value="">-- Aucun / rattacher directement --</option>
+      <label for="sousMatiere">Sous-matière / Discipline</label>
+      <select id="sousMatiere" required>
+        <option value="">-- Choisir d'abord une unité/dossier --</option>
       </select>
 
       <label for="nom">Nom de la SA</label>
@@ -60,6 +61,7 @@
         <option value="">Tous</option>
       </select>
     </div>
+
     <div id="listeSA" class="admin-liste">Chargement...</div>
 
   </main>
@@ -69,5 +71,6 @@
   <script src="../../js/supabaseClient.js"></script>
   <script src="../../js/auth.js"></script>
   <script src="../../js/pages/admin-sa.js?v=2"></script>
+
 </body>
 </html>
