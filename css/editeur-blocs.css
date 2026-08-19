@@ -255,3 +255,119 @@
   color: var(--bleu-fonce);
   font-weight: 600;
 }
+/* ===== Système d'activités par niveau ===== */
+
+.activite-carte {
+  border: 1px solid var(--bordure);
+  border-radius: 10px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.activite-entete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  color: white;
+}
+
+.activite-entete-niveau {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.activite-niveau-nom-fon {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.activite-niveau-nom-fr {
+  font-size: 11px;
+  opacity: 0.9;
+}
+
+.niveau-1 { background: #16a34a; }
+.niveau-2 { background: #2563eb; }
+.niveau-3 { background: #b45309; }
+.niveau-4 { background: #dc2626; }
+
+.badge-niveau-mini {
+  display: inline-block;
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 999px;
+  margin-right: 6px;
+}
+
+.activite-corps {
+  padding: 12px;
+}
+
+.activite-select-niveau {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.correction-zone {
+  margin-top: 16px;
+  padding: 14px;
+  background: #f8fafc;
+  border: 1px dashed var(--bordure);
+  border-radius: 10px;
+}
+
+.correction-zone-titre {
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 10px;
+  color: var(--texte-fonce);
+}
+
+.exercice-bloc-editeur {
+  border: 1px solid var(--bordure);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 10px;
+  background: white;
+}
+
+.exercice-bloc-champ {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--bordure);
+  border-radius: 6px;
+  font-size: 14px;
+  margin-bottom: 6px;
+  box-sizing: border-box;
+}
+
+.statut-niveau-ok { color: #16a34a; }
+.statut-niveau-manquant { color: #dc2626; }
+
+/* ===== Rendu public des niveaux ===== */
+.rendu-niveau-badge-grand {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+}
+
+.rendu-niveau-badge-grand .nom-fon {
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.rendu-niveau-badge-grand .nom-fr {
+  font-size: 12px;
+  opacity: 0.9;
+}
