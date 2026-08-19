@@ -8,7 +8,6 @@ let tousLesUD = [];
 let toutesLesSA = [];
 let toutesLesSeances = [];
 let tousLesAdmins = [];
-let tousLesAdmins = [];
 
 async function chargerActivitesDepuisBase(seanceId) {
   const { data: activites } = await supabaseClient.from('seance_activites').select('*').eq('seance_id', seanceId).order('ordre', { ascending: true });
