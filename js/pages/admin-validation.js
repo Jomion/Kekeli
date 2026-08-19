@@ -7,7 +7,6 @@ let toutesLesSA = [];
 let toutesLesClasses = [];
 let tousLesAdmins = [];
 let typeActuel = 'seances';
-let typeActuel = 'seances';
 
 async function chargerActivitesEnAttente() {
   const container = document.getElementById('listeEnAttente');
