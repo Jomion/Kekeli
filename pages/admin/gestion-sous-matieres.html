@@ -10,7 +10,7 @@
 <body>
 
   <header class="admin-header">
-    <h1>Sous-matières</h1>
+    <h1>Sous-matières / Disciplines</h1>
     <a href="dashboard.html" class="btn-deconnexion">← Retour</a>
   </header>
 
@@ -25,7 +25,12 @@
         <option value="">-- Choisir d'abord une/des classe(s) --</option>
       </select>
 
-      <label for="nom">Nom de la sous-matière</label>
+      <label for="uniteDossier">Unité / Dossier</label>
+      <select id="uniteDossier" required>
+        <option value="">-- Choisir d'abord une matière --</option>
+      </select>
+
+      <label for="nom">Nom de la sous-matière / discipline</label>
       <input type="text" id="nom" placeholder="Ex: Grammaire" required>
 
       <label for="ordre">Ordre d'affichage</label>
@@ -46,6 +51,7 @@
         <option value="">Toutes les matières</option>
       </select>
     </div>
+
     <div id="listeSousMatieres" class="admin-liste">Chargement...</div>
 
   </main>
@@ -54,7 +60,7 @@
   <script src="../../js/config.js"></script>
   <script src="../../js/supabaseClient.js"></script>
   <script src="../../js/auth.js"></script>
-  <script src="../../js/pages/admin-sous-matieres.js"></script>
+  <script src="../../js/pages/admin-sous-matieres.js?v=2"></script>
 
 </body>
 </html>
