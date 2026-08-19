@@ -180,7 +180,46 @@ async function chargerSeance() {
     ${bloc('⚠️ Attention', seance.attention)}
     ${bloc('🚫 Avertissement', seance.avertissement)}
   `;
+  const NIVEAUX_SEANCE = {
+    1: { nomFon: 'Azɔ̀ví', nomFr: 'Apprenti', emoji: '🌱', classe: 'niveau-1' },
+    2: { nomFon: 'Dèví', nomFr: 'Disciple', emoji: '🪘', classe: 'niveau-2' },
+    3: { nomFon: 'Ògán', nomFr: 'Patron', emoji: '🦁', classe: 'niveau-3' },
+    4: { nomFon: 'Axɔ́sú', nomFr: 'Roi', emoji: '👑', classe: 'niveau-4' }
+  };
 
+  const { data: activitesPubliees } = await supabaseClient
+    .from('seance_activites')
+    .select('*')
+    .eq('seance_id', seanceId)
+    .eq('statut', 'publie')
+    .order('niveau', { ascending: true });
+
+  let sectionActivites = '';
+  if (activitesPubliees && activitesPubliees.length > 0) {
+    sectionActivites = `
+      <section style="margin-top:24px;padding-top:20px;border-top:1px solid var(--bordure);">
+        <h3 style="font-size:15px;color:var(--bleu-fonce);margin-bottom:10px;">Activités</h3>
+        <div style="display:flex;flex-direction:column;gap:8px;">
+          ${activitesPubliees.map(a => {
+            const n = NIVEAUX_SEANCE[a.niveau];
+            return `<a href="activite.html?id=${a.id}" class="activite-entete ${n.classe}" style="text-decoration:none;border-radius:8px;">
+              <div class="activite-entete-niveau">
+                <span class="activite-niveau-nom-fon">${n.emoji} ${n.nomFon}</span>
+                <span class="activite-niveau-nom-fr">${n.nomFr}</span>
+              </div>
+            </a>`;
+          }).join('')}
+        </div>
+      </section>
+    `;
+  }
+
+  const { data: exercicesLies } = await supabaseClient
+    .from('exercices')
+    .select('id, titre')
+    .eq('seance_id', seanceId)
+    .eq('statut', 'publie')
+    .order('ordre', { ascending: true });
   const { data: exercicesLies } = await supabaseClient
     .from('exercices')
     .select('id, titre')
@@ -200,7 +239,7 @@ async function chargerSeance() {
     `;
   }
 
-      container.innerHTML = `
+        container.innerHTML = `
     <p style="color:var(--texte-gris);font-size:13px;margin-bottom:2px;">${filAriane}</p>
     <p style="color:var(--texte-gris);font-size:13px;margin-bottom:4px;">${libelleAffiche}</p>
     <h1 style="font-size:22px;color:var(--bleu-fonce);margin-bottom:20px;">${seance.titre}</h1>
@@ -208,6 +247,7 @@ async function chargerSeance() {
     ${htmlBlocs}
     ${htmlAnciensChamps}
 
+    ${sectionActivites}
     ${sectionExercices}
   `;
 }
