@@ -25,11 +25,6 @@
         <option value="">-- Choisir d'abord une/des classe(s) --</option>
       </select>
 
-      <label for="sousMatiere">Sous-matière (si applicable)</label>
-      <select id="sousMatiere">
-        <option value="">-- Aucune / non applicable --</option>
-      </select>
-
       <label for="type">Type</label>
       <select id="type" required>
         <option value="unite">Unité</option>
@@ -45,6 +40,7 @@
 
       <label for="nom">Nom</label>
       <input type="text" id="nom" placeholder="Ex: Unité 1 ou Dossier 2" required>
+
       <label for="ordre">Ordre d'affichage</label>
       <input type="number" id="ordre" placeholder="Ex: 1" required>
 
@@ -63,6 +59,7 @@
         <option value="">Toutes les matières</option>
       </select>
     </div>
+
     <div id="listeUnitesDossiers" class="admin-liste">Chargement...</div>
 
   </main>
@@ -72,5 +69,6 @@
   <script src="../../js/supabaseClient.js"></script>
   <script src="../../js/auth.js"></script>
   <script src="../../js/pages/admin-unites-dossiers.js?v=2"></script>
+
 </body>
 </html>
