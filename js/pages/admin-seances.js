@@ -41,6 +41,55 @@ async function chargerActivitesDepuisBase(seanceId) {
   chargerActivitesExistantes(activites, blocsParActivite, corrections || [], blocsParCorrection);
 }
 
+async function afficherApercuActivites(seanceId) {
+  const zone = document.getElementById('apercu-activites-' + seanceId);
+  if (!zone) return;
+
+  if (zone.style.display !== 'none') { zone.style.display = 'none'; return; }
+
+  zone.style.display = 'block';
+  zone.innerHTML = 'Chargement...';
+
+  const { data: activites } = await supabaseClient.from('seance_activites').select('*').eq('seance_id', seanceId).order('niveau', { ascending: true });
+
+  if (!activites || activites.length === 0) {
+    zone.innerHTML = '<p style="font-size:13px;">Aucune activité ajoutée pour cette séance.</p>';
+    return;
+  }
+
+  const emojisNiveaux = { 1: '🌱 Azɔ̀ví', 2: '🪘 Dèví', 3: '🦁 Ògán', 4: '👑 Axɔ́sú' };
+  const idsActivites = activites.map(a => a.id);
+
+  const { data: blocs } = await supabaseClient.from('activite_blocs').select('*').in('activite_id', idsActivites).order('ordre', { ascending: true });
+  const { data: corrections } = await supabaseClient.from('activite_corrections').select('*').in('activite_id', idsActivites);
+  const idsCorrections = (corrections || []).map(c => c.id);
+  const { data: correctionBlocs } = idsCorrections.length > 0
+    ? await supabaseClient.from('correction_blocs').select('*').in('correction_id', idsCorrections).order('ordre', { ascending: true })
+    : { data: [] };
+
+  let html = '';
+  activites.forEach(a => {
+    const blocsActivite = (blocs || []).filter(b => b.activite_id === a.id);
+    const correction = (corrections || []).find(c => c.activite_id === a.id);
+    const blocsCorrection = correction ? (correctionBlocs || []).filter(cb => cb.correction_id === correction.id) : [];
+
+    html += `<div style="margin-bottom:14px;padding-bottom:10px;border-bottom:1px solid var(--bordure);">
+      <strong>${emojisNiveaux[a.niveau]}</strong>`;
+
+    blocsActivite.forEach(b => {
+      if (b.type === 'texte') {
+        html += `<p style="font-size:13px;margin-top:6px;"><em>${b.contenu.nom || 'Texte'} :</em> ${b.contenu.texte || '(vide)'}</p>`;
+      } else {
+        const cb = blocsCorrection.find(c => c.bloc_activite_id === b.id);
+        html += `<p style="font-size:13px;margin-top:6px;"><strong>Q :</strong> ${b.contenu.enonce || '(vide)'}<br><strong>Réponse :</strong> ${cb && cb.contenu.bonneReponse ? cb.contenu.bonneReponse : '<span style="color:#dc2626;">manquante</span>'}</p>`;
+      }
+    });
+
+    html += `</div>`;
+  });
+
+  zone.innerHTML = html;
+}
 async function sauvegarderActivites(seanceId) {
   synchroniserDonneesDepuisDom();
 
@@ -401,10 +450,20 @@ async function chargerListe() {
     return;
   }
 
-  toutesLesSeances = data;
+    toutesLesSeances = data;
 
-  let donneesAffichees = data.map(s => ({ ...s, __infos: retrouverInfos(s) }))
-    .filter(s => s.__infos.classeId && peutAccederClasse(s.__infos.classeId));
+  const idsSeancesVisibles = data.map(s => s.id);
+  const { data: activitesToutes } = idsSeancesVisibles.length > 0
+    ? await supabaseClient.from('seance_activites').select('seance_id, niveau').in('seance_id', idsSeancesVisibles)
+    : { data: [] };
+
+  const niveauxParSeance = {};
+  (activitesToutes || []).forEach(a => {
+    if (!niveauxParSeance[a.seance_id]) niveauxParSeance[a.seance_id] = new Set();
+    niveauxParSeance[a.seance_id].add(a.niveau);
+  });
+
+  let donneesAffichees = data.map(s => ({ ...s, __infos: retrouverInfos(s) }))    .filter(s => s.__infos.classeId && peutAccederClasse(s.__infos.classeId));
 
   if (filtreClasseId) donneesAffichees = donneesAffichees.filter(s => s.__infos.classeId === filtreClasseId);
   if (filtreMatiereNom) donneesAffichees = donneesAffichees.filter(s => s.__infos.nomMatiere === filtreMatiereNom);
@@ -449,9 +508,15 @@ async function chargerListe() {
     const dateAffichee = dateObj.toLocaleDateString('fr-FR') + ' à ' + dateObj.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
     const infosSoumission = `${dateAffichee} - ${nomAdmin(seance.cree_par)} - ${badgesStatut[seance.statut] || seance.statut}`;
 
-    const boutons = lectureSeule
-      ? ''
-      : `<button class="btn-modifier" data-id="${seance.id}">✏️</button><button class="btn-supprimer" data-id="${seance.id}">🗑️</button>`;
+        const boutons = lectureSeule
+      ? `<button class="btn-voir-activites" data-id="${seance.id}">🎯</button>`
+      : `<button class="btn-voir-activites" data-id="${seance.id}">🎯</button><button class="btn-modifier" data-id="${seance.id}">✏️</button><button class="btn-supprimer" data-id="${seance.id}">🗑️</button>`;
+
+    const niveauxPresents = niveauxParSeance[seance.id] ? [...niveauxParSeance[seance.id]].sort() : [];
+    const emojisNiveaux = { 1: '🌱', 2: '🪘', 3: '🦁', 4: '👑' };
+    const badgesNiveaux = niveauxPresents.length > 0
+      ? niveauxPresents.map(n => emojisNiveaux[n]).join(' ')
+      : '<span style="color:var(--texte-gris);">aucune activité</span>';
 
     const ligne = document.createElement('div');
     ligne.className = 'admin-ligne';
@@ -462,11 +527,15 @@ async function chargerListe() {
         <span><strong>${principal}</strong> <small>(${contexte})</small></span>
         <div class="admin-ligne-actions">${boutons}</div>
       </div>
-      <div style="font-size:12px;color:var(--texte-gris);margin-top:4px;">${infosSoumission}</div>
+      <div style="font-size:12px;color:var(--texte-gris);margin-top:4px;">${infosSoumission} — Activités : ${badgesNiveaux}</div>
+      <div id="apercu-activites-${seance.id}" style="display:none;margin-top:10px;padding:12px;background:var(--bleu-clair);border-radius:8px;"></div>
     `;
     container.appendChild(ligne);
   });
 
+  document.querySelectorAll('.btn-voir-activites').forEach(btn => {
+    btn.addEventListener('click', () => afficherApercuActivites(btn.dataset.id));
+  });
   if (!lectureSeule) {
     document.querySelectorAll('.btn-modifier').forEach(btn => {
       btn.addEventListener('click', () => activerModeEdition(btn.dataset.id, donneesAffichees));
