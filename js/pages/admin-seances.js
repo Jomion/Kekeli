@@ -8,6 +8,91 @@ let tousLesUD = [];
 let toutesLesSA = [];
 let toutesLesSeances = [];
 let tousLesAdmins = [];
+let tousLesAdmins = [];
+
+async function chargerActivitesDepuisBase(seanceId) {
+  const { data: activites } = await supabaseClient.from('seance_activites').select('*').eq('seance_id', seanceId).order('ordre', { ascending: true });
+
+  if (!activites || activites.length === 0) {
+    reinitialiserActivites();
+    return;
+  }
+
+  const idsActivites = activites.map(a => a.id);
+  const { data: blocs } = await supabaseClient.from('activite_blocs').select('*').in('activite_id', idsActivites).order('ordre', { ascending: true });
+  const { data: corrections } = await supabaseClient.from('activite_corrections').select('*').in('activite_id', idsActivites);
+
+  const idsCorrections = (corrections || []).map(c => c.id);
+  const { data: correctionBlocs } = idsCorrections.length > 0
+    ? await supabaseClient.from('correction_blocs').select('*').in('correction_id', idsCorrections).order('ordre', { ascending: true })
+    : { data: [] };
+
+  const blocsParActivite = {};
+  (blocs || []).forEach(b => {
+    if (!blocsParActivite[b.activite_id]) blocsParActivite[b.activite_id] = [];
+    blocsParActivite[b.activite_id].push(b);
+  });
+
+  const blocsParCorrection = {};
+  (correctionBlocs || []).forEach(cb => {
+    if (!blocsParCorrection[cb.correction_id]) blocsParCorrection[cb.correction_id] = [];
+    blocsParCorrection[cb.correction_id].push(cb);
+  });
+
+  chargerActivitesExistantes(activites, blocsParActivite, corrections || [], blocsParCorrection);
+}
+
+async function sauvegarderActivites(seanceId) {
+  synchroniserDonneesDepuisDom();
+
+  // Supprime tout l'existant pour cette séance puis réinsère (méthode simple et fiable)
+  const { data: anciennesActivites } = await supabaseClient.from('seance_activites').select('id').eq('seance_id', seanceId);
+  if (anciennesActivites && anciennesActivites.length > 0) {
+    await supabaseClient.from('seance_activites').delete().eq('seance_id', seanceId);
+  }
+
+  for (let i = 0; i < activitesActuelles.length; i++) {
+    const activite = activitesActuelles[i];
+    if (activite.blocs.length === 0) continue; // ignore les activités vides
+
+    const { data: nouvelleActivite, error: errActivite } = await supabaseClient
+      .from('seance_activites')
+      .insert({ seance_id: seanceId, niveau: activite.niveau, ordre: i, statut: 'brouillon', cree_par: profilAdmin.id })
+      .select().single();
+
+    if (errActivite || !nouvelleActivite) continue;
+
+    const lignesBlocs = activite.blocs.map((b, bi) => ({
+      activite_id: nouvelleActivite.id, type: b.type, ordre: bi, contenu: b.contenu
+    }));
+    const { data: blocsInseres } = await supabaseClient.from('activite_blocs').insert(lignesBlocs).select();
+
+    const { data: nouvelleCorrection } = await supabaseClient
+      .from('activite_corrections')
+      .insert({ activite_id: nouvelleActivite.id, statut: 'brouillon', cree_par: profilAdmin.id })
+      .select().single();
+
+    if (nouvelleCorrection && blocsInseres) {
+      const lignesCorrection = activite.correction.blocs.map((cb, cbi) => {
+        let blocActiviteReelId = null;
+        if (!cb.estNoteLibre) {
+          const indexOriginal = activite.blocs.findIndex(b => b.id === cb.blocActiviteId);
+          if (indexOriginal !== -1 && blocsInseres[indexOriginal]) {
+            blocActiviteReelId = blocsInseres[indexOriginal].id;
+          }
+        }
+        return {
+          correction_id: nouvelleCorrection.id,
+          bloc_activite_id: blocActiviteReelId,
+          type: cb.type,
+          ordre: cbi,
+          contenu: cb.contenu
+        };
+      });
+      await supabaseClient.from('correction_blocs').insert(lignesCorrection);
+    }
+  }
+}
 
 async function chargerDonneesBase() {
   const [resClasses, resMatieres, resSousMatieres, resUD, resSA, resAdmins] = await Promise.all([
@@ -441,9 +526,12 @@ function activerModeEdition(id, liste) {
   document.getElementById('statut').value = seance.statut === 'publie' ? 'en_attente' : seance.statut;
   document.getElementById('ordre').value = seance.ordre;
 
-  // Charge les blocs de contenu enrichi existants pour cette séance
+    // Charge les blocs de contenu enrichi existants pour cette séance
   supabaseClient.from('seance_blocs').select('*').eq('seance_id', id).order('ordre', { ascending: true })
     .then(({ data }) => chargerBlocsExistants(data || []));
+
+  // Charge les activités, leurs blocs et leurs corrections
+  chargerActivitesDepuisBase(id);
 
   seanceEnEdition = id;
   document.querySelector('#formAjout button[type="submit"]').textContent = '✏️ Modifier';
@@ -542,8 +630,14 @@ document.getElementById('formAjout').addEventListener('submit', async (e) => {
   const numero = document.getElementById('numero').value ? parseInt(document.getElementById('numero').value) : null;
   const messageForm = document.getElementById('messageForm');
 
-  if (classesChoisies.length === 0 || !nomMatiere) {
+    if (classesChoisies.length === 0 || !nomMatiere) {
     messageForm.textContent = "Sélectionne au moins une classe et une matière.";
+    return;
+  }
+
+  const statutChoisi = document.getElementById('statut').value;
+  if (statutChoisi === 'en_attente' && !niveau1EstComplet()) {
+    messageForm.textContent = "⛔ Impossible d'envoyer en validation : le niveau 🌱 Azɔ̀ví (avec sa correction complète) est requis.";
     return;
   }
 
@@ -615,6 +709,7 @@ document.getElementById('formAjout').addEventListener('submit', async (e) => {
     return;
   }
 
+   // Sauvegarde les blocs de contenu enrichi (supprime les anciens, réinsère les actuels)
   if (idSeanceTraitee) {
     await supabaseClient.from('seance_blocs').delete().eq('seance_id', idSeanceTraitee);
     if (blocsActuels.length > 0) {
@@ -626,12 +721,15 @@ document.getElementById('formAjout').addEventListener('submit', async (e) => {
       }));
       await supabaseClient.from('seance_blocs').insert(lignesBlocs);
     }
+
+    await sauvegarderActivites(idSeanceTraitee);
   }
 
-  document.getElementById('formAjout').reset();
+    document.getElementById('formAjout').reset();
   document.querySelector('#formAjout button[type="submit"]').textContent = '➕ Ajouter';
   seanceEnEdition = null;
   reinitialiserBlocs();
+  reinitialiserActivites();
   if (!messageForm.textContent.includes('ignoré')) messageForm.textContent = '';
   messageForm.style.color = '';
 
