@@ -7,7 +7,112 @@ let toutesLesSA = [];
 let toutesLesClasses = [];
 let tousLesAdmins = [];
 let typeActuel = 'seances';
+let typeActuel = 'seances';
 
+async function chargerActivitesEnAttente() {
+  const container = document.getElementById('listeEnAttente');
+
+  const { data: activites, error } = await supabaseClient
+    .from('seance_activites')
+    .select('*, seances(titre)')
+    .eq('statut', 'brouillon')
+    .order('created_at', { ascending: true });
+
+  if (error) {
+    container.innerHTML = "Erreur : " + error.message;
+    return;
+  }
+
+  const idsAutorises = await idsAutorisesPourControle();
+  let items = activites || [];
+  if (idsAutorises !== null) {
+    items = items.filter(i => idsAutorises.includes(i.cree_par));
+  }
+
+  if (items.length === 0) {
+    container.innerHTML = "Aucune activité en attente pour l'instant.";
+    return;
+  }
+
+  const NIVEAUX_VAL = { 1: '🌱 Azɔ̀ví', 2: '🪘 Dèví', 3: '🦁 Ògán', 4: '👑 Axɔ́sú' };
+
+  container.innerHTML = '';
+  for (const activite of items) {
+    const { data: correction } = await supabaseClient.from('activite_corrections').select('*').eq('activite_id', activite.id).maybeSingle();
+    const correctionComplete = correction && correction.statut !== null;
+
+    const dateObj = new Date(activite.created_at);
+    const dateAffichee = dateObj.toLocaleDateString('fr-FR') + ' à ' + dateObj.toLocaleTimeString('fr-FR', { hour: '2-digit', minute: '2-digit' });
+
+    const ligne = document.createElement('div');
+    ligne.className = 'admin-ligne';
+    ligne.style.flexDirection = 'column';
+    ligne.style.alignItems = 'stretch';
+    ligne.innerHTML = `
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <span><strong>${NIVEAUX_VAL[activite.niveau]}</strong> <small>(${activite.seances ? activite.seances.titre : '?'})</small></span>
+        <div class="admin-ligne-actions">
+          <button class="btn-voir" data-id="${activite.id}">👁️ Voir</button>
+          <button class="btn-valider-activite" data-id="${activite.id}" data-correction-id="${correction ? correction.id : ''}">✅ Publier</button>
+        </div>
+      </div>
+      <div style="font-size:12px;color:var(--texte-gris);margin-top:4px;">Soumis le ${dateAffichee} par ${nomAdmin(activite.cree_par)} ${correction ? '— correction prête' : '— ⚠️ aucune correction trouvée'}</div>
+      <div id="apercu-activite-${activite.id}" style="display:none;margin-top:10px;padding:12px;background:var(--bleu-clair);border-radius:8px;font-size:14px;"></div>
+    `;
+    container.appendChild(ligne);
+  }
+
+  document.querySelectorAll('.btn-voir').forEach(btn => {
+    btn.addEventListener('click', () => afficherApercuActivite(btn.dataset.id));
+  });
+  document.querySelectorAll('.btn-valider-activite').forEach(btn => {
+    btn.addEventListener('click', () => validerActivite(btn.dataset.id, btn.dataset.correctionId));
+  });
+}
+
+async function afficherApercuActivite(activiteId) {
+  const zone = document.getElementById('apercu-activite-' + activiteId);
+  if (!zone) return;
+  if (zone.style.display !== 'none') { zone.style.display = 'none'; return; }
+
+  zone.style.display = 'block';
+  zone.innerHTML = 'Chargement...';
+
+  const { data: blocs } = await supabaseClient.from('activite_blocs').select('*').eq('activite_id', activiteId).order('ordre', { ascending: true });
+  const { data: correction } = await supabaseClient.from('activite_corrections').select('*').eq('activite_id', activiteId).maybeSingle();
+  const { data: correctionBlocs } = correction
+    ? await supabaseClient.from('correction_blocs').select('*').eq('correction_id', correction.id)
+    : { data: [] };
+
+  let html = '';
+  (blocs || []).forEach(b => {
+    if (b.type === 'texte') {
+      html += `<p><em>${b.contenu.nom || 'Texte'} :</em> ${b.contenu.texte || ''}</p>`;
+    } else {
+      const cb = (correctionBlocs || []).find(c => c.bloc_activite_id === b.id);
+      html += `<p><strong>Q :</strong> ${b.contenu.enonce || ''}<br><strong>Réponse :</strong> ${cb && cb.contenu.bonneReponse ? cb.contenu.bonneReponse : '<span style="color:#dc2626;">manquante</span>'}</p>`;
+    }
+  });
+
+  zone.innerHTML = html || '<p>Aucun contenu.</p>';
+}
+
+async function validerActivite(activiteId, correctionId) {
+  const confirmation = window.confirm("Publier cette activité et sa correction ?");
+  if (confirmation !== true) return;
+
+  await supabaseClient.from('seance_activites').update({
+    statut: 'publie', valide_par: profilAdmin.id, valide_le: new Date().toISOString()
+  }).eq('id', activiteId);
+
+  if (correctionId) {
+    await supabaseClient.from('activite_corrections').update({
+      statut: 'publie', valide_par: profilAdmin.id, valide_le: new Date().toISOString()
+    }).eq('id', correctionId);
+  }
+
+  chargerListe();
+}
 function matiereIdDepuisRattachement(item) {
   function depuisSM(smId) {
     const sm = toutesLesSousMatieres.find(s => s.id === smId);
@@ -126,14 +231,20 @@ async function chargerListe() {
   const container = document.getElementById('listeEnAttente');
   container.innerHTML = 'Chargement...';
 
-  const descriptions = {
+    const descriptions = {
     seances: "Séances en attente de validation.",
     exercices: "Exercices en attente de validation.",
     quiz: "Quiz en attente de validation.",
     epreuves: "Épreuves en attente de validation.",
-    ressources: "Ressources en attente de validation."
+    ressources: "Ressources en attente de validation.",
+    activites: "Activités (avec leur correction) en attente de validation."
   };
   document.getElementById('descriptionOnglet').textContent = descriptions[typeActuel];
+
+  if (typeActuel === 'activites') {
+    await chargerActivitesEnAttente();
+    return;
+  }
 
   const { data, error } = await supabaseClient
     .from(typeActuel)
