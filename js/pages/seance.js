@@ -220,13 +220,7 @@ async function chargerSeance() {
     .eq('seance_id', seanceId)
     .eq('statut', 'publie')
     .order('ordre', { ascending: true });
-  const { data: exercicesLies } = await supabaseClient
-    .from('exercices')
-    .select('id, titre')
-    .eq('seance_id', seanceId)
-    .eq('statut', 'publie')
-    .order('ordre', { ascending: true });
-
+  
   let sectionExercices = '';
   if (exercicesLies && exercicesLies.length > 0) {
     sectionExercices = `
