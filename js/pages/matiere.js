@@ -1,9 +1,9 @@
-// Page publique : navigation dans la structure d'une matière (s'adapte à ce qui existe réellement)
+// Page publique : navigation dans la structure d'une matière (nouvel ordre : Unité/Dossier → Sous-matière → SA)
 
 const params = new URLSearchParams(window.location.search);
 const matiereId = params.get('id');
-const smId = params.get('sm');
 const udId = params.get('ud');
+const smId = params.get('sm');
 const saId = params.get('sa');
 
 let nomMatiereActuelle = '';
@@ -11,8 +11,8 @@ let nomMatiereActuelle = '';
 function construireLien(nouveauxParams) {
   const p = new URLSearchParams();
   p.set('id', matiereId);
-  if (nouveauxParams.sm) p.set('sm', nouveauxParams.sm);
   if (nouveauxParams.ud) p.set('ud', nouveauxParams.ud);
+  if (nouveauxParams.sm) p.set('sm', nouveauxParams.sm);
   if (nouveauxParams.sa) p.set('sa', nouveauxParams.sa);
   return 'matiere.html?' + p.toString();
 }
@@ -20,13 +20,13 @@ function construireLien(nouveauxParams) {
 async function construireFilArianeActuel() {
   const parties = [nomMatiereActuelle];
 
-  if (smId) {
-    const { data: sm } = await supabaseClient.from('sous_matieres').select('*').eq('id', smId).single();
-    if (sm) parties.push(sm.nom);
-  }
   if (udId) {
     const { data: ud } = await supabaseClient.from('unites_dossiers').select('*').eq('id', udId).single();
     if (ud) parties.push(ud.semaine ? `${ud.nom} (${ud.semaine})` : ud.nom);
+  }
+  if (smId) {
+    const { data: sm } = await supabaseClient.from('sous_matieres').select('*').eq('id', smId).single();
+    if (sm) parties.push(sm.nom);
   }
   if (saId) {
     const { data: sa } = await supabaseClient.from('sa').select('*').eq('id', saId).single();
@@ -34,11 +34,6 @@ async function construireFilArianeActuel() {
   }
 
   return parties.join(' › ');
-}
-
-function afficherFilAriane(texte) {
-  const zone = document.getElementById('filAriane');
-  if (zone) zone.textContent = texte;
 }
 
 function afficherListeStructure(items, type) {
@@ -50,10 +45,10 @@ function afficherListeStructure(items, type) {
     const carte = document.createElement('a');
     carte.className = 'carte-classe';
 
-    let lienParams = { sm: smId, ud: udId, sa: saId };
-    if (type === 'sm') lienParams = { sm: item.id };
-    if (type === 'ud') lienParams = { sm: smId, ud: item.id };
-    if (type === 'sa') lienParams = { sm: smId, ud: udId, sa: item.id };
+    let lienParams = { ud: udId, sm: smId, sa: saId };
+    if (type === 'ud') lienParams = { ud: item.id };
+    if (type === 'sm') lienParams = { ud: udId, sm: item.id };
+    if (type === 'sa') lienParams = { ud: udId, sm: smId, sa: item.id };
 
     carte.href = construireLien(lienParams);
 
@@ -117,39 +112,33 @@ async function chargerContenu() {
   nomMatiereActuelle = matiere.nom_complet || matiere.nom;
   document.getElementById('titreMatiere').textContent = nomMatiereActuelle;
 
+  // Niveau SA choisi -> affiche les séances de cette SA
   if (saId) {
     afficherSeances({ sa_id: saId });
     return;
   }
 
-  if (udId) {
-    const { data: saList } = await supabaseClient.from('sa').select('*').eq('unite_dossier_id', udId).order('ordre', { ascending: true });
-    if (saList && saList.length > 0) { afficherListeStructure(saList, 'sa'); return; }
-    afficherSeances({ unite_dossier_id: udId });
-    return;
-  }
-
+  // Niveau Sous-matière choisi -> cherche des SA dessous, sinon les séances
   if (smId) {
-    const { data: udList } = await supabaseClient.from('unites_dossiers').select('*').eq('sous_matiere_id', smId).order('ordre', { ascending: true });
-    if (udList && udList.length > 0) { afficherListeStructure(udList, 'ud'); return; }
-
     const { data: saList } = await supabaseClient.from('sa').select('*').eq('sous_matiere_id', smId).order('ordre', { ascending: true });
     if (saList && saList.length > 0) { afficherListeStructure(saList, 'sa'); return; }
-
     afficherSeances({ sous_matiere_id: smId });
     return;
   }
 
-  const { data: smList } = await supabaseClient.from('sous_matieres').select('*').eq('matiere_id', matiereId).order('ordre', { ascending: true });
-  if (smList && smList.length > 0) { afficherListeStructure(smList, 'sm'); return; }
+  // Niveau Unité/Dossier choisi -> cherche des sous-matières dessous (toujours obligatoires dans la nouvelle hiérarchie)
+  if (udId) {
+    const { data: smList } = await supabaseClient.from('sous_matieres').select('*').eq('unite_dossier_id', udId).order('ordre', { ascending: true });
+    if (smList && smList.length > 0) { afficherListeStructure(smList, 'sm'); return; }
+    document.getElementById('contenuMatiere').innerHTML = '<p style="padding:0 20px;">Aucune sous-matière disponible pour l\'instant.</p>';
+    return;
+  }
 
+  // Racine de la matière -> liste des Unités/Dossiers
   const { data: udList } = await supabaseClient.from('unites_dossiers').select('*').eq('matiere_id', matiereId).order('ordre', { ascending: true });
   if (udList && udList.length > 0) { afficherListeStructure(udList, 'ud'); return; }
 
-  const { data: saList } = await supabaseClient.from('sa').select('*').eq('matiere_id', matiereId).order('ordre', { ascending: true });
-  if (saList && saList.length > 0) { afficherListeStructure(saList, 'sa'); return; }
-
-  afficherSeances({ matiere_id: matiereId });
+  document.getElementById('contenuMatiere').innerHTML = '<p style="padding:0 20px;">Aucun contenu disponible pour cette matière pour l\'instant.</p>';
 }
 
 chargerContenu();
