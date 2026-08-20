@@ -25,14 +25,14 @@
         <option value="">-- Choisir d'abord une/des classe(s) --</option>
       </select>
 
-      <label for="sousMatiere">Sous-matière (si applicable)</label>
-      <select id="sousMatiere">
-        <option value="">-- Aucune --</option>
+      <label for="uniteDossier">Unité / Dossier</label>
+      <select id="uniteDossier" required>
+        <option value="">-- Choisir d'abord une matière --</option>
       </select>
 
-      <label for="uniteDossier">Unité / Dossier (si applicable)</label>
-      <select id="uniteDossier">
-        <option value="">-- Aucun --</option>
+      <label for="sousMatiere">Sous-matière / Discipline</label>
+      <select id="sousMatiere" required>
+        <option value="">-- Choisir d'abord une unité/dossier --</option>
       </select>
 
       <label for="sa">SA (si applicable)</label>
@@ -150,7 +150,7 @@
   <script src="../../js/config.js"></script>
   <script src="../../js/supabaseClient.js"></script>
   <script src="../../js/auth.js"></script>
-  <script src="../../js/pages/admin-exercices.js?v=2"></script>
+  <script src="../../js/pages/admin-exercices.js?v=3"></script>
 
 </body>
 </html>
