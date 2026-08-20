@@ -1,17 +1,17 @@
-// Gestion CRUD des SA
+// Gestion CRUD des SA (hiérarchie fixe : Matière → Unité/Dossier → Sous-matière → SA)
 
 let saEnEdition = null;
 let toutesLesClasses = [];
 let toutesLesMatieres = [];
-let toutesLesSousMatieres = [];
 let tousLesUD = [];
+let toutesLesSousMatieres = [];
 
 async function chargerDonneesBase() {
-  const [resClasses, resMatieres, resSousMatieres, resUD] = await Promise.all([
+  const [resClasses, resMatieres, resUD, resSM] = await Promise.all([
     supabaseClient.from('classes').select('*').order('ordre', { ascending: true }),
     supabaseClient.from('matieres').select('*'),
-    supabaseClient.from('sous_matieres').select('*'),
-    supabaseClient.from('unites_dossiers').select('*')
+    supabaseClient.from('unites_dossiers').select('*'),
+    supabaseClient.from('sous_matieres').select('*')
   ]);
 
   if (resClasses.error) {
@@ -21,8 +21,8 @@ async function chargerDonneesBase() {
 
   toutesLesClasses = resClasses.data;
   toutesLesMatieres = resMatieres.data || [];
-  toutesLesSousMatieres = resSousMatieres.data || [];
   tousLesUD = resUD.data || [];
+  toutesLesSousMatieres = resSM.data || [];
 
   const selectClasse = document.getElementById('classe');
   const selectFiltre = document.getElementById('filtreClasse');
@@ -62,18 +62,15 @@ async function chargerDonneesBase() {
 
 function remplirMatieres() {
   const classesChoisies = Array.from(document.getElementById('classe').selectedOptions).map(o => o.value);
-  const selectMatiere = document.getElementById('matiere');
-  document.getElementById('sousMatiere').innerHTML = '<option value="">-- Aucune / non applicable --</option>';
-  document.getElementById('uniteDossier').innerHTML = '<option value="">-- Aucun / rattacher directement --</option>';
+  document.getElementById('uniteDossier').innerHTML = '<option value="">-- Choisir d\'abord une matière --</option>';
+  document.getElementById('sousMatiere').innerHTML = '<option value="">-- Choisir d\'abord une unité/dossier --</option>';
 
+  const selectMatiere = document.getElementById('matiere');
   selectMatiere.innerHTML = '<option value="">-- Choisir une matière --</option>';
   if (classesChoisies.length === 0) return;
 
-  const nomsDisponibles = [...new Set(
-    toutesLesMatieres.filter(m => classesChoisies.includes(m.classe_id)).map(m => m.nom)
-  )].sort();
-
-  nomsDisponibles.forEach(nom => {
+  const noms = [...new Set(toutesLesMatieres.filter(m => classesChoisies.includes(m.classe_id)).map(m => m.nom))].sort();
+  noms.forEach(nom => {
     const opt = document.createElement('option');
     opt.value = nom;
     opt.textContent = nom;
@@ -81,110 +78,77 @@ function remplirMatieres() {
   });
 }
 
-function remplirSousMatieres() {
-  const classesChoisies = Array.from(document.getElementById('classe').selectedOptions).map(o => o.value);
-  const nomMatiere = document.getElementById('matiere').value;
-  document.getElementById('uniteDossier').innerHTML = '<option value="">-- Aucun / rattacher directement --</option>';
-
-  const selectSM = document.getElementById('sousMatiere');
-  selectSM.innerHTML = '<option value="">-- Aucune / non applicable --</option>';
-  if (!nomMatiere) return;
-
-  const idsMatieres = toutesLesMatieres.filter(m => classesChoisies.includes(m.classe_id) && m.nom === nomMatiere).map(m => m.id);
-  const nomsSM = [...new Set(
-    toutesLesSousMatieres.filter(sm => idsMatieres.includes(sm.matiere_id)).map(sm => sm.nom)
-  )].sort();
-
-  nomsSM.forEach(nom => {
-    const opt = document.createElement('option');
-    opt.value = nom;
-    opt.textContent = nom;
-    selectSM.appendChild(opt);
-  });
-
-  remplirUD();
-}
-
 function remplirUD() {
   const classesChoisies = Array.from(document.getElementById('classe').selectedOptions).map(o => o.value);
   const nomMatiere = document.getElementById('matiere').value;
-  const nomSM = document.getElementById('sousMatiere').value;
+  document.getElementById('sousMatiere').innerHTML = '<option value="">-- Choisir d\'abord une unité/dossier --</option>';
 
   const selectUD = document.getElementById('uniteDossier');
-  selectUD.innerHTML = '<option value="">-- Aucun / rattacher directement --</option>';
+  selectUD.innerHTML = '<option value="">-- Choisir une unité/dossier --</option>';
   if (!nomMatiere) return;
 
   const idsMatieres = toutesLesMatieres.filter(m => classesChoisies.includes(m.classe_id) && m.nom === nomMatiere).map(m => m.id);
+  const udDisponibles = tousLesUD.filter(ud => idsMatieres.includes(ud.matiere_id));
 
-  let idsCibles;
-  if (nomSM) {
-    idsCibles = toutesLesSousMatieres.filter(sm => idsMatieres.includes(sm.matiere_id) && sm.nom === nomSM).map(sm => sm.id);
-    var nomsUD = [...new Set(tousLesUD.filter(ud => idsCibles.includes(ud.sous_matiere_id)).map(ud => ud.nom))].sort();
-  } else {
-    var nomsUD = [...new Set(tousLesUD.filter(ud => idsMatieres.includes(ud.matiere_id)).map(ud => ud.nom))].sort();
-  }
-
-  nomsUD.forEach(nom => {
+  udDisponibles.forEach(ud => {
     const opt = document.createElement('option');
-    opt.value = nom;
-    opt.textContent = nom;
+    opt.value = ud.nom + (ud.semaine ? '|' + ud.semaine : '');
+    opt.textContent = `${ud.nom}${ud.semaine ? ' (' + ud.semaine + ')' : ''} - ${ud.type}`;
     selectUD.appendChild(opt);
   });
 }
 
+function remplirSousMatieres() {
+  const classesChoisies = Array.from(document.getElementById('classe').selectedOptions).map(o => o.value);
+  const nomMatiere = document.getElementById('matiere').value;
+  const valeurUD = document.getElementById('uniteDossier').value;
+
+  const selectSM = document.getElementById('sousMatiere');
+  selectSM.innerHTML = '<option value="">-- Choisir une sous-matière --</option>';
+  if (!valeurUD) return;
+
+  const [nomUD, semaineUD] = valeurUD.split('|');
+  const idsMatieres = toutesLesMatieres.filter(m => classesChoisies.includes(m.classe_id) && m.nom === nomMatiere).map(m => m.id);
+  const udsCorrespondants = tousLesUD.filter(ud => idsMatieres.includes(ud.matiere_id) && ud.nom === nomUD && (ud.semaine || '') === (semaineUD || ''));
+  const idsUD = udsCorrespondants.map(ud => ud.id);
+
+  const smDisponibles = toutesLesSousMatieres.filter(sm => idsUD.includes(sm.unite_dossier_id));
+  smDisponibles.forEach(sm => {
+    const opt = document.createElement('option');
+    opt.value = sm.nom;
+    opt.textContent = sm.nom;
+    selectSM.appendChild(opt);
+  });
+}
+
 document.getElementById('classe').addEventListener('change', remplirMatieres);
-document.getElementById('matiere').addEventListener('change', remplirSousMatieres);
-document.getElementById('sousMatiere').addEventListener('change', remplirUD);
+document.getElementById('matiere').addEventListener('change', remplirUD);
+document.getElementById('uniteDossier').addEventListener('change', remplirSousMatieres);
 
 function retrouverClasseId(sa) {
-  let matiereId = sa.matiere_id;
-
-  if (sa.unite_dossier_id) {
-    const ud = tousLesUD.find(u => u.id === sa.unite_dossier_id);
-    if (ud) {
-      if (ud.sous_matiere_id) {
-        const sm = toutesLesSousMatieres.find(s => s.id === ud.sous_matiere_id);
-        matiereId = sm ? sm.matiere_id : null;
-      } else {
-        matiereId = ud.matiere_id;
-      }
-    }
-  } else if (sa.sous_matiere_id) {
-    const sm = toutesLesSousMatieres.find(s => s.id === sa.sous_matiere_id);
-    matiereId = sm ? sm.matiere_id : null;
-  }
-
-  const matiere = toutesLesMatieres.find(m => m.id === matiereId);
+  const sm = toutesLesSousMatieres.find(s => s.id === sa.sous_matiere_id);
+  if (!sm) return null;
+  const ud = tousLesUD.find(u => u.id === sm.unite_dossier_id);
+  if (!ud) return null;
+  const matiere = toutesLesMatieres.find(m => m.id === ud.matiere_id);
   return matiere ? matiere.classe_id : null;
 }
 
 function retrouverInfos(sa) {
   const classeId = retrouverClasseId(sa);
   const classeObj = toutesLesClasses.find(c => c.id === classeId);
-  const nomClasse = classeObj ? classeObj.nom : '?';
+  const sm = toutesLesSousMatieres.find(s => s.id === sa.sous_matiere_id);
+  const ud = sm ? tousLesUD.find(u => u.id === sm.unite_dossier_id) : null;
+  const matiere = ud ? toutesLesMatieres.find(m => m.id === ud.matiere_id) : null;
 
-  let nomMatiere = '?', nomUD = null;
-  if (sa.unite_dossier_id) {
-    const ud = tousLesUD.find(u => u.id === sa.unite_dossier_id);
-    nomUD = ud ? ud.nom : '?';
-    if (ud && ud.sous_matiere_id) {
-      const sm = toutesLesSousMatieres.find(s => s.id === ud.sous_matiere_id);
-      const m = sm ? toutesLesMatieres.find(mm => mm.id === sm.matiere_id) : null;
-      nomMatiere = m ? m.nom : '?';
-    } else if (ud) {
-      const m = toutesLesMatieres.find(mm => mm.id === ud.matiere_id);
-      nomMatiere = m ? m.nom : '?';
-    }
-  } else if (sa.sous_matiere_id) {
-    const sm = toutesLesSousMatieres.find(s => s.id === sa.sous_matiere_id);
-    const m = sm ? toutesLesMatieres.find(mm => mm.id === sm.matiere_id) : null;
-    nomMatiere = m ? m.nom : '?';
-  } else if (sa.matiere_id) {
-    const m = toutesLesMatieres.find(mm => mm.id === sa.matiere_id);
-    nomMatiere = m ? m.nom : '?';
-  }
-
-  return { classeId, nomClasse, nomMatiere, nomUD };
+  return {
+    classeId,
+    nomClasse: classeObj ? classeObj.nom : '?',
+    nomMatiere: matiere ? matiere.nom : '?',
+    nomUD: ud ? ud.nom : '?',
+    semaineUD: ud ? ud.semaine : null,
+    nomSM: sm ? sm.nom : '?'
+  };
 }
 
 async function chargerListe() {
@@ -217,9 +181,7 @@ async function chargerListe() {
   container.innerHTML = '';
   donneesAffichees.forEach(sa => {
     const infos = sa.__infos;
-    const contexte = infos.nomUD
-      ? `${infos.nomUD} - ${infos.nomMatiere} - ${infos.nomClasse}`
-      : `${infos.nomMatiere} - ${infos.nomClasse}`;
+    const contexte = `${infos.nomSM} - ${infos.nomUD}${infos.semaineUD ? ' (' + infos.semaineUD + ')' : ''} - ${infos.nomMatiere} - ${infos.nomClasse}`;
 
     const ligne = document.createElement('div');
     ligne.className = 'admin-ligne';
@@ -251,20 +213,10 @@ function activerModeEdition(id, liste) {
   });
   remplirMatieres();
   document.getElementById('matiere').value = infos.nomMatiere;
-  remplirSousMatieres();
-
-  if (sa.sous_matiere_id) {
-    const sm = toutesLesSousMatieres.find(s => s.id === sa.sous_matiere_id);
-    document.getElementById('sousMatiere').value = sm ? sm.nom : '';
-  } else if (sa.unite_dossier_id) {
-    const ud = tousLesUD.find(u => u.id === sa.unite_dossier_id);
-    if (ud && ud.sous_matiere_id) {
-      const sm = toutesLesSousMatieres.find(s => s.id === ud.sous_matiere_id);
-      document.getElementById('sousMatiere').value = sm ? sm.nom : '';
-    }
-  }
   remplirUD();
-  document.getElementById('uniteDossier').value = infos.nomUD || '';
+  document.getElementById('uniteDossier').value = infos.nomUD + (infos.semaineUD ? '|' + infos.semaineUD : '');
+  remplirSousMatieres();
+  document.getElementById('sousMatiere').value = infos.nomSM;
 
   document.getElementById('nom').value = sa.nom;
   document.getElementById('ordre').value = sa.ordre;
@@ -288,31 +240,13 @@ async function supprimerSA(id) {
   chargerListe();
 }
 
-// Retrouve l'id précis (matière, sous-matière ou UD) pour une classe donnée
-function resoudreCibleSA(classeId, nomMatiere, nomSM, nomUD) {
+function resoudreSousMatiere(classeId, nomMatiere, valeurUD, nomSM) {
+  const [nomUD, semaineUD] = valeurUD.split('|');
   const matiere = toutesLesMatieres.find(m => m.classe_id === classeId && m.nom === nomMatiere);
   if (!matiere) return null;
-
-  if (nomUD) {
-    let ud;
-    if (nomSM) {
-      const sm = toutesLesSousMatieres.find(s => s.matiere_id === matiere.id && s.nom === nomSM);
-      if (!sm) return null;
-      ud = tousLesUD.find(u => u.sous_matiere_id === sm.id && u.nom === nomUD);
-    } else {
-      ud = tousLesUD.find(u => u.matiere_id === matiere.id && u.nom === nomUD);
-    }
-    if (!ud) return null;
-    return { unite_dossier_id: ud.id, sous_matiere_id: null, matiere_id: null };
-  }
-
-  if (nomSM) {
-    const sm = toutesLesSousMatieres.find(s => s.matiere_id === matiere.id && s.nom === nomSM);
-    if (!sm) return null;
-    return { unite_dossier_id: null, sous_matiere_id: sm.id, matiere_id: null };
-  }
-
-  return { unite_dossier_id: null, sous_matiere_id: null, matiere_id: matiere.id };
+  const ud = tousLesUD.find(u => u.matiere_id === matiere.id && u.nom === nomUD && (u.semaine || '') === (semaineUD || ''));
+  if (!ud) return null;
+  return toutesLesSousMatieres.find(sm => sm.unite_dossier_id === ud.id && sm.nom === nomSM);
 }
 
 document.getElementById('formAjout').addEventListener('submit', async (e) => {
@@ -320,56 +254,53 @@ document.getElementById('formAjout').addEventListener('submit', async (e) => {
 
   const classesChoisies = Array.from(document.getElementById('classe').selectedOptions).map(o => o.value);
   const nomMatiere = document.getElementById('matiere').value;
+  const valeurUD = document.getElementById('uniteDossier').value;
   const nomSM = document.getElementById('sousMatiere').value;
-  const nomUD = document.getElementById('uniteDossier').value;
   const nom = document.getElementById('nom').value;
   const ordre = parseInt(document.getElementById('ordre').value);
   const messageForm = document.getElementById('messageForm');
 
-  if (classesChoisies.length === 0 || !nomMatiere) {
-    messageForm.textContent = "Sélectionne au moins une classe et une matière.";
+  if (classesChoisies.length === 0 || !nomMatiere || !valeurUD || !nomSM) {
+    messageForm.textContent = "Remplis tous les champs (classe, matière, unité/dossier, sous-matière).";
     return;
   }
 
   let resultat;
 
   if (saEnEdition) {
-    const cible = resoudreCibleSA(classesChoisies[0], nomMatiere, nomSM, nomUD);
-    if (!cible) {
-      messageForm.textContent = "Combinaison invalide pour cette classe.";
-      return;
-    }
-    resultat = await supabaseClient.from('sa').update({ nom, ordre, ...cible }).eq('id', saEnEdition);
+    const sm = resoudreSousMatiere(classesChoisies[0], nomMatiere, valeurUD, nomSM);
+    if (!sm) { messageForm.textContent = "Combinaison invalide."; return; }
+    resultat = await supabaseClient.from('sa').update({ sous_matiere_id: sm.id, nom, ordre }).eq('id', saEnEdition);
   } else {
     const lignes = [];
-    const classesIgnorees = [];
+    const ignorees = [];
 
     classesChoisies.forEach(classeId => {
-      const cible = resoudreCibleSA(classeId, nomMatiere, nomSM, nomUD);
-      if (!cible) {
+      const sm = resoudreSousMatiere(classeId, nomMatiere, valeurUD, nomSM);
+      if (!sm) {
         const classe = toutesLesClasses.find(c => c.id === classeId);
-        classesIgnorees.push(classe ? classe.nom : '?');
+        ignorees.push(classe ? classe.nom : '?');
         return;
       }
-      lignes.push({ nom, ordre, ...cible });
+      lignes.push({ sous_matiere_id: sm.id, nom, ordre });
     });
 
     if (lignes.length === 0) {
-      messageForm.textContent = "Aucune des classes sélectionnées n'a cette combinaison matière/sous-matière/unité.";
+      messageForm.textContent = "Aucune des classes sélectionnées n'a cette combinaison.";
       return;
     }
 
     resultat = await supabaseClient.from('sa').insert(lignes);
 
-    if (!resultat.error && classesIgnorees.length > 0) {
+    if (!resultat.error && ignorees.length > 0) {
       messageForm.style.color = '#b45309';
-      messageForm.textContent = `Ajouté, mais ignoré pour : ${classesIgnorees.join(', ')}.`;
+      messageForm.textContent = `Ajouté, mais ignoré pour : ${ignorees.join(', ')}.`;
     }
   }
 
   if (resultat.error) {
     if (resultat.error.code === '23505') {
-      messageForm.textContent = "Cette SA existe déjà pour au moins une des classes sélectionnées.";
+      messageForm.textContent = "Cette SA existe déjà pour cette sous-matière.";
     } else {
       messageForm.textContent = "Erreur : " + resultat.error.message;
     }
