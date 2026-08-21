@@ -21,7 +21,7 @@ async function chargerMatieresAvant() {
     const carte = document.createElement('a');
     carte.href = `pages/matiere.html?id=${m.id}`;
     carte.className = 'carte-classe';
-    carte.innerHTML = `${m.nom_complet || m.nom}<small style="display:block;font-weight:400;font-size:12px;margin-top:4px;">${m.classes ? m.classes.nom : ''}</small>`;
+    carte.innerHTML = `<span class="icone-matiere">${iconeMatiere(m.nom)}</span>${m.nom_complet || m.nom}<small style="display:block;font-weight:400;font-size:12px;margin-top:4px;">${m.classes ? m.classes.nom : ''}</small>`;  
     grille.appendChild(carte);
   });
 }
