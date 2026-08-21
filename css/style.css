@@ -374,3 +374,108 @@ a {
   border-color: var(--accent);
   color: var(--blanc);
 }
+/* ===== Section présentation (accueil) ===== */
+.section-presentation {
+  padding: 32px 20px;
+  text-align: center;
+  max-width: 600px;
+  margin: 0 auto;
+}
+
+.section-presentation h2 {
+  font-size: 20px;
+  color: var(--bleu-fonce);
+  margin-bottom: 12px;
+}
+
+.section-presentation p {
+  color: var(--texte-gris);
+  line-height: 1.7;
+  font-size: 15px;
+}
+
+/* ===== Section matières mises en avant ===== */
+.section-matieres-avant {
+  padding: 8px 0 32px;
+}
+
+.section-matieres-avant h2 {
+  font-size: 18px;
+  color: var(--bleu-fonce);
+  padding: 0 20px;
+  margin-bottom: 16px;
+}
+
+.grille-matieres-avant {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  padding: 0 20px;
+}
+
+/* ===== Pied de page ===== */
+.pied-de-page {
+  background: var(--bleu-fonce);
+  color: white;
+  padding: 32px 20px 16px;
+  margin-top: 20px;
+}
+
+.pied-contenu {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.pied-bloc h3 {
+  font-size: 14px;
+  margin-bottom: 10px;
+  color: rgba(255,255,255,0.7);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pied-bloc a {
+  display: block;
+  color: white;
+  font-size: 14px;
+  padding: 4px 0;
+  text-decoration: none;
+}
+
+.pied-bloc a:active {
+  opacity: 0.7;
+}
+
+.pied-logo {
+  height: 36px;
+  filter: brightness(0) invert(1);
+  margin-bottom: 8px;
+}
+
+.pied-slogan {
+  font-size: 13px;
+  color: rgba(255,255,255,0.7);
+  font-style: italic;
+}
+
+.pied-copyright {
+  text-align: center;
+  font-size: 12px;
+  color: rgba(255,255,255,0.5);
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255,255,255,0.15);
+}
+
+@media (min-width: 768px) {
+  .pied-contenu {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+  .grille-matieres-avant {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
