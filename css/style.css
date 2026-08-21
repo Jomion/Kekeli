@@ -166,17 +166,29 @@ a {
   align-items: center;
   justify-content: center;
   gap: 6px;
-  padding: 24px 12px;
-  background: var(--bleu-clair);
+  padding: 22px 12px;
+  background: white;
   border: 1px solid var(--bordure);
   border-radius: var(--radius);
   font-weight: 600;
-  font-size: 16px;
+  font-size: 15px;
   color: var(--bleu-fonce);
-  min-height: 64px;
+  min-height: 90px;
   box-shadow: 0 1px 3px rgba(0,0,0,0.06);
-  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease;
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, background 0.15s ease;
   animation: apparitionCarte 0.4s ease-out both;
+  text-align: center;
+  text-decoration: none;
+}
+
+.carte-classe .icone-matiere {
+  font-size: 30px;
+  line-height: 1;
+}
+
+.carte-classe small {
+  color: var(--texte-gris);
+  font-weight: 500;
 }
 
 .carte-classe .icone-matiere {
@@ -190,10 +202,15 @@ a {
   transform: scale(0.97);
 }
 
+.carte-classe:active small {
+  color: rgba(255,255,255,0.8);
+}
+
 .carte-classe:hover {
-  box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+  box-shadow: 0 6px 16px rgba(29,78,216,0.15);
   border-color: var(--accent);
-  transform: translateY(-2px);
+  transform: translateY(-3px);
+  background: var(--bleu-clair);
 }
 
 @keyframes apparitionCarte {
@@ -479,3 +496,22 @@ a {
     grid-template-columns: repeat(4, 1fr);
   }
 }
+/* ===== Animation en cascade pour les grilles de cartes ===== */
+#grilleMatieres .carte-classe:nth-child(1),
+#grille .carte-classe:nth-child(1),
+.grille-matieres-avant .carte-classe:nth-child(1) { animation-delay: 0s; }
+#grilleMatieres .carte-classe:nth-child(2),
+#grille .carte-classe:nth-child(2),
+.grille-matieres-avant .carte-classe:nth-child(2) { animation-delay: 0.05s; }
+#grilleMatieres .carte-classe:nth-child(3),
+#grille .carte-classe:nth-child(3),
+.grille-matieres-avant .carte-classe:nth-child(3) { animation-delay: 0.1s; }
+#grilleMatieres .carte-classe:nth-child(4),
+#grille .carte-classe:nth-child(4),
+.grille-matieres-avant .carte-classe:nth-child(4) { animation-delay: 0.15s; }
+#grilleMatieres .carte-classe:nth-child(5),
+#grille .carte-classe:nth-child(5),
+.grille-matieres-avant .carte-classe:nth-child(5) { animation-delay: 0.2s; }
+#grilleMatieres .carte-classe:nth-child(6),
+#grille .carte-classe:nth-child(6),
+.grille-matieres-avant .carte-classe:nth-child(6) { animation-delay: 0.25s; }
