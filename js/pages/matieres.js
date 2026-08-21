@@ -54,9 +54,10 @@ async function chargerMatieres(classeId) {
 
   matieres.forEach(matiere => {
     const carte = document.createElement('a');
+        const carte = document.createElement('a');
     carte.href = `matiere.html?id=${matiere.id}`;
     carte.className = 'carte-classe';
-    carte.textContent = matiere.nom_complet || matiere.nom;
+    carte.innerHTML = `<span class="icone-matiere">${iconeMatiere(matiere.nom)}</span>${matiere.nom_complet || matiere.nom}`;
     grille.appendChild(carte);
   });
 }
