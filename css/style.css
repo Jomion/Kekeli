@@ -1,0 +1,480 @@
+/* ===== Variables globales — charte KEKELI (alignée sur la maquette) ===== */
+:root {
+  --bleu-principal: #003366;   /* bleu-kekeli */
+  --bleu-fonce: #001F3F;       /* navy profond (footer, dégradés) */
+  --bleu-nuit: #001A33;        /* utilisé dans les dégradés hero/login */
+  --bleu-clair: #F4F7F9;       /* bg-light de la maquette */
+  --accent: #FFCC00;           /* jaune-kekeli */
+  --accent-fonce: #e6b800;     /* jaune au survol */
+  --accent-clair: #FFF9E6;     /* jaune très clair (badges, avatars) */
+  --texte-fonce: #1E293B;
+  --texte-gris: #64748B;
+  --blanc: #ffffff;
+  --bordure: #E2E8F0;
+  --radius: 12px;
+}
+* {
+  margin: 0;
+  padding: 0;
+  box-sizing: border-box;
+}
+
+body {
+  font-family: 'Segoe UI', Tahoma, Geneva, Verdana, Arial, sans-serif;
+  color: var(--texte-fonce);
+  background: var(--bleu-clair);
+  line-height: 1.5;
+}
+
+a {
+  text-decoration: none;
+  color: inherit;
+}
+
+/* ===== En-tête ===== */
+.header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 14px 20px;
+  background: var(--blanc);
+  box-shadow: 0 2px 10px rgba(0,0,0,0.05);
+  position: sticky;
+  top: 0;
+  z-index: 100;
+}
+
+.logo-placeholder {
+  font-size: 22px;
+  font-weight: 700;
+  color: var(--bleu-principal);
+}
+
+.menu-toggle {
+  font-size: 26px;
+  background: none;
+  border: none;
+  cursor: pointer;
+  color: var(--texte-fonce);
+  padding: 6px 10px;
+}
+
+/* ===== Menu (mobile-first : caché par défaut) ===== */
+.menu {
+  display: none;
+  flex-direction: column;
+  background: var(--blanc);
+  border-bottom: 1px solid var(--bordure);
+}
+
+.menu.ouvert {
+  display: flex;
+}
+
+.menu a {
+  padding: 14px 20px;
+  font-size: 16px;
+  font-weight: 600;
+  border-bottom: 1px solid var(--bordure);
+  color: var(--texte-fonce);
+}
+
+.menu a:active,
+.menu a:hover {
+  background: var(--bleu-clair);
+  color: var(--bleu-principal);
+}
+
+/* ===== Hero ===== */
+.hero {
+  text-align: center;
+  padding: 60px 20px 50px;
+  background: linear-gradient(135deg, var(--bleu-principal) 0%, var(--bleu-nuit) 100%);
+  color: white;
+}
+
+.hero h1 {
+  font-size: 34px;
+  font-weight: 800;
+  margin-bottom: 10px;
+  letter-spacing: 0.5px;
+}
+
+.slogan {
+  font-size: 16px;
+  color: #CBD5E1;
+  max-width: 480px;
+  margin: 0 auto;
+}
+
+/* ===== Liste des classes ===== */
+.classes-list {
+  padding: 30px 20px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+.classes-list h2 {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--bleu-principal);
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+/* ===== Section avantages (façon maquette) ===== */
+.features {
+  max-width: 1100px;
+  margin: 50px auto;
+  padding: 0 20px;
+  text-align: center;
+}
+
+.features h2 {
+  color: var(--bleu-principal);
+  font-size: 22px;
+  font-weight: 800;
+  margin-bottom: 30px;
+}
+
+.grid-features {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+  gap: 20px;
+}
+
+.feature-card {
+  background: white;
+  padding: 26px 22px;
+  border-radius: 12px;
+  box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+  border-top: 4px solid var(--bleu-principal);
+  text-align: left;
+}
+
+.feature-icon {
+  font-size: 32px;
+  margin-bottom: 12px;
+}
+
+.feature-card h3 {
+  color: var(--bleu-principal);
+  font-size: 16px;
+  margin-bottom: 8px;
+}
+
+.feature-card p {
+  color: var(--texte-gris);
+  font-size: 14px;
+  line-height: 1.5;
+}
+.btn-cta {
+  display: inline-block;
+  margin-top: 24px;
+  padding: 14px 30px;
+  background: var(--accent);
+  color: var(--bleu-principal);
+  font-weight: 800;
+  font-size: 15px;
+  border-radius: 8px;
+  transition: background 0.15s ease;
+}
+.btn-cta:hover {
+  background: var(--accent-fonce);
+}
+
+#classesContainer {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+}
+
+.carte-classe {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: center;
+  gap: 6px;
+  padding: 22px 12px;
+  background: white;
+  border: none;
+  border-top: 4px solid var(--bleu-principal);
+  border-radius: 10px;
+  font-weight: 600;
+  font-size: 15px;
+  color: var(--bleu-principal);
+  min-height: 90px;
+  box-shadow: 0 2px 8px rgba(0,0,0,0.05);
+  transition: transform 0.15s ease, box-shadow 0.15s ease, border-color 0.15s ease, background 0.15s ease;
+  animation: apparitionCarte 0.4s ease-out both;
+  text-align: center;
+  text-decoration: none;
+}
+
+.carte-classe .icone-matiere {
+  font-size: 30px;
+  line-height: 1;
+}
+
+.carte-classe small {
+  color: var(--texte-gris);
+  font-weight: 500;
+}
+
+.carte-classe .icone-matiere {
+  font-size: 26px;
+  line-height: 1;
+}
+
+.carte-classe:active {
+  background: var(--bleu-principal);
+  color: var(--blanc);
+  transform: scale(0.97);
+}
+
+.carte-classe:active small {
+  color: rgba(255,255,255,0.8);
+}
+
+.carte-classe:hover {
+  box-shadow: 0 8px 18px rgba(0,51,102,0.15);
+  border-top-color: var(--accent);
+  transform: translateY(-3px);
+}
+
+@keyframes apparitionCarte {
+  from { opacity: 0; transform: translateY(8px); }
+  to { opacity: 1; transform: translateY(0); }
+}
+.carte-classe:active {
+  background: var(--bleu-principal);
+  color: var(--blanc);
+}
+
+/* ===== Écrans plus larges (ordinateur) ===== */
+@media (min-width: 768px) {
+  .menu-toggle {
+    display: none;
+  }
+
+  .menu {
+    display: flex;
+    flex-direction: row;
+  }
+
+  .menu a {
+    border-bottom: none;
+    padding: 10px 16px;
+  }
+
+  #classesContainer {
+    grid-template-columns: repeat(6, 1fr);
+  }
+}
+.logo-img {
+  height: 38px;
+  width: auto;
+  display: block;
+}
+
+@media (min-width: 768px) {
+  .logo-img {
+    height: 46px;
+  }
+}
+
+/* ===== Boutons connexion / inscription dans le header ===== */
+.auth-liens {
+  display: flex;
+  gap: 10px;
+  align-items: center;
+}
+.auth-liens .btn-connexion,
+.auth-liens .btn-inscription {
+  padding: 9px 18px;
+  border-radius: 8px;
+  font-size: 13px;
+  font-weight: bold;
+  text-decoration: none;
+  white-space: nowrap;
+  transition: all 0.15s ease;
+}
+.auth-liens .btn-connexion {
+  color: var(--bleu-principal);
+  border: 2px solid var(--bleu-principal);
+}
+.auth-liens .btn-connexion:hover {
+  background: var(--bleu-principal);
+  color: white;
+}
+.auth-liens .btn-inscription {
+  background-color: var(--accent);
+  color: var(--bleu-principal);
+  border: 2px solid var(--accent);
+}
+.auth-liens .btn-inscription:hover {
+  background-color: var(--accent-fonce);
+  border-color: var(--accent-fonce);
+}
+@media (max-width: 640px) {
+  .auth-liens .btn-connexion { display: none; } /* garde uniquement "S'inscrire" sur mobile, "Se connecter" reste dans le menu */
+}
+/* ===== Couleur d'accent - badges et éléments dynamiques ===== */
+.badge-accent {
+  display: inline-block;
+  background: var(--accent-clair);
+  color: var(--accent-fonce);
+  font-size: 12px;
+  font-weight: 600;
+  padding: 3px 10px;
+  border-radius: 999px;
+}
+
+.btn-secondaire {
+  display: inline-block;
+  background: var(--blanc);
+  color: var(--bleu-principal);
+  border: 1px solid var(--bleu-principal);
+  border-radius: 8px;
+  padding: 10px 16px;
+  font-size: 14px;
+  font-weight: 600;
+  cursor: pointer;
+  text-decoration: none;
+  transition: all 0.15s ease;
+}
+
+.btn-secondaire:hover {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--blanc);
+}
+/* ===== Section présentation (accueil) ===== */
+.section-presentation {
+  padding: 40px 20px;
+  text-align: center;
+  max-width: 700px;
+  margin: 0 auto;
+}
+
+.section-presentation h2 {
+  font-size: 22px;
+  font-weight: 800;
+  color: var(--bleu-principal);
+  margin-bottom: 12px;
+}
+
+.section-presentation p {
+  color: var(--texte-gris);
+  line-height: 1.7;
+  font-size: 15px;
+}
+
+/* ===== Section matières mises en avant ===== */
+.section-matieres-avant {
+  padding: 8px 0 40px;
+}
+
+.section-matieres-avant h2 {
+  font-size: 20px;
+  font-weight: 800;
+  color: var(--bleu-principal);
+  padding: 0 20px;
+  margin-bottom: 16px;
+  text-align: center;
+}
+
+.grille-matieres-avant {
+  display: grid;
+  grid-template-columns: repeat(2, 1fr);
+  gap: 12px;
+  padding: 0 20px;
+  max-width: 1100px;
+  margin: 0 auto;
+}
+
+/* ===== Pied de page ===== */
+.pied-de-page {
+  background: var(--bleu-fonce);
+  color: white;
+  padding: 36px 20px 18px;
+  margin-top: 20px;
+}
+
+.pied-contenu {
+  display: flex;
+  flex-direction: column;
+  gap: 24px;
+  max-width: 900px;
+  margin: 0 auto;
+}
+
+.pied-bloc h3 {
+  font-size: 14px;
+  margin-bottom: 10px;
+  color: rgba(255,255,255,0.7);
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+}
+
+.pied-bloc a {
+  display: block;
+  color: white;
+  font-size: 14px;
+  padding: 4px 0;
+  text-decoration: none;
+}
+
+.pied-bloc a:active {
+  opacity: 0.7;
+}
+
+.pied-logo {
+  height: 36px;
+  filter: brightness(0) invert(1);
+  margin-bottom: 8px;
+}
+
+.pied-slogan {
+  font-size: 13px;
+  color: rgba(255,255,255,0.7);
+  font-style: italic;
+}
+
+.pied-copyright {
+  text-align: center;
+  font-size: 12px;
+  color: rgba(255,255,255,0.5);
+  margin-top: 24px;
+  padding-top: 16px;
+  border-top: 1px solid rgba(255,255,255,0.15);
+}
+
+@media (min-width: 768px) {
+  .pied-contenu {
+    flex-direction: row;
+    justify-content: space-between;
+  }
+  .grille-matieres-avant {
+    grid-template-columns: repeat(4, 1fr);
+  }
+}
+/* ===== Animation en cascade pour les grilles de cartes ===== */
+#grilleMatieres .carte-classe:nth-child(1),
+#grille .carte-classe:nth-child(1),
+.grille-matieres-avant .carte-classe:nth-child(1) { animation-delay: 0s; }
+#grilleMatieres .carte-classe:nth-child(2),
+#grille .carte-classe:nth-child(2),
+.grille-matieres-avant .carte-classe:nth-child(2) { animation-delay: 0.05s; }
+#grilleMatieres .carte-classe:nth-child(3),
+#grille .carte-classe:nth-child(3),
+.grille-matieres-avant .carte-classe:nth-child(3) { animation-delay: 0.1s; }
+#grilleMatieres .carte-classe:nth-child(4),
+#grille .carte-classe:nth-child(4),
+.grille-matieres-avant .carte-classe:nth-child(4) { animation-delay: 0.15s; }
+#grilleMatieres .carte-classe:nth-child(5),
+#grille .carte-classe:nth-child(5),
+.grille-matieres-avant .carte-classe:nth-child(5) { animation-delay: 0.2s; }
+#grilleMatieres .carte-classe:nth-child(6),
+#grille .carte-classe:nth-child(6),
+.grille-matieres-avant .carte-classe:nth-child(6) { animation-delay: 0.25s; }

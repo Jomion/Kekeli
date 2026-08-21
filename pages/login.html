@@ -1,0 +1,100 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>KEKELI - Connexion</title>
+  <style>
+    :root {
+      --bleu-kekeli: #003366;
+      --jaune-kekeli: #FFCC00;
+      --bg-light: #F4F7F9;
+      --text-dark: #222222;
+    }
+    * { box-sizing: border-box; }
+    body {
+      font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+      background: linear-gradient(135deg, var(--bleu-kekeli) 0%, #001A33 100%);
+      min-height: 100vh;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      padding: 20px;
+    }
+    .login-card {
+      background: white;
+      padding: 40px;
+      border-radius: 16px;
+      box-shadow: 0 10px 25px rgba(0,0,0,0.2);
+      width: 100%;
+      max-width: 380px;
+      text-align: center;
+      border-top: 6px solid var(--jaune-kekeli);
+    }
+    .logo-title { font-size: 28px; font-weight: 800; color: var(--bleu-kekeli); margin-bottom: 5px; letter-spacing: 1px; }
+    .logo-title span { color: var(--jaune-kekeli); }
+    .subtitle { font-size: 14px; color: #666; margin-bottom: 25px; }
+    .form-group { margin-bottom: 18px; text-align: left; }
+    label { display: block; font-size: 13px; font-weight: bold; color: var(--text-dark); margin-bottom: 6px; }
+    input, select {
+      width: 100%; padding: 12px; border: 2px solid #E0E0E0; border-radius: 8px;
+      font-size: 14px; transition: border-color 0.3s;
+    }
+    input:focus, select:focus { outline: none; border-color: var(--bleu-kekeli); }
+    .btn-login {
+      width: 100%; padding: 14px; background-color: var(--jaune-kekeli); color: var(--bleu-kekeli);
+      border: none; border-radius: 8px; font-size: 16px; font-weight: bold; cursor: pointer;
+      margin-top: 10px; transition: background 0.2s;
+    }
+    .btn-login:hover { background-color: #e6b800; }
+    .btn-login:disabled { opacity: 0.6; cursor: default; }
+    .footer-links { margin-top: 20px; font-size: 13px; }
+    .footer-links a { color: var(--bleu-kekeli); text-decoration: none; font-weight: 600; }
+    .message-erreur { color: #c0392b; font-size: 13px; margin-top: -8px; margin-bottom: 14px; min-height: 16px; }
+  </style>
+</head>
+<body>
+
+  <div class="login-card">
+    <div class="logo-title">☀️ KEKELI<span>.</span></div>
+    <div class="subtitle">Espace d'apprentissage &amp; de réussite</div>
+
+    <form id="formLogin">
+      <div class="form-group">
+        <label>Je suis :</label>
+        <select id="role" required>
+          <option value="eleve">👧 Élève</option>
+          <option value="enseignant">👨‍🏫 Enseignant</option>
+          <option value="parent">👨‍👩‍👧 Parent</option>
+        </select>
+      </div>
+
+      <div class="form-group">
+        <label>Identifiant ou e-mail</label>
+        <input type="text" id="identifiant" placeholder="Ex: biodun.cm2" required>
+      </div>
+
+      <div class="form-group">
+        <label>Mot de passe</label>
+        <input type="password" id="motDePasse" placeholder="••••••••" required>
+      </div>
+
+      <p class="message-erreur" id="messageErreur"></p>
+
+      <button type="submit" class="btn-login" id="btnLogin">Se connecter 🚀</button>
+    </form>
+
+    <div class="footer-links">
+      Pas encore de compte ? <a href="inscription.html">S'inscrire</a>
+    </div>
+  </div>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/supabaseClient.js"></script>
+  <script>const RACINE_SITE = "../";</script>
+  <script src="../js/auth-roles.js"></script>
+  <script src="../js/pages/login.js"></script>
+</body>
+</html>

@@ -8,18 +8,14 @@
 </head>
 <body>
 
-  <div class="bande-lumiere">
-    <span class="lumiere"></span>
-    <div class="header-fusionne">
-      <a href="index.html"><img src="assets/logo/logo.png" alt="KEKELI" class="logo-img"></a>
-      <div class="auth-liens">
-        <a href="pages/login.html" class="btn-connexion">Se connecter</a>
-        <a href="pages/inscription.html" class="btn-inscription">S'inscrire</a>
-      </div>
-      <button class="menu-toggle" id="menuToggle">☰</button>
+  <header class="header">
+    <a href="index.html"><img src="assets/logo/logo.png" alt="KEKELI" class="logo-img"></a>
+    <div class="auth-liens">
+      <a href="pages/login.html" class="btn-connexion">Se connecter</a>
+      <a href="pages/inscription.html" class="btn-inscription">S'inscrire</a>
     </div>
-    <p class="slogan-anime">L'éducation qui éclaire l'avenir</p>
-  </div>
+    <button class="menu-toggle" id="menuToggle">☰</button>
+  </header>
   <nav class="menu" id="menu">
     <a href="pages/cours.html">Cours</a>
     <a href="pages/exercices.html">Exercices</a>
@@ -34,10 +30,32 @@
   <main>
     <section class="hero">
       <h1>KEKELI</h1>
-      <p class="slogan">L'éducation qui éclaire l'avenir.</p>
+      <p class="slogan">L'éducation qui éclaire l'avenir. Cours clairs, exercices interactifs et suivi en temps réel pour les élèves, enseignants et parents.</p>
+      <a href="pages/inscription.html" class="btn-cta">Accéder à mon espace 🚀</a>
     </section>
 
-        <section class="classes-list">
+    <section class="features">
+      <h2>Un parcours personnalisé pour chaque élève</h2>
+      <div class="grid-features">
+        <div class="feature-card">
+          <div class="feature-icon">📚</div>
+          <h3>Programme conforme</h3>
+          <p>Des contenus alignés sur les Unités d'Apprentissage, de la CI au CM2, pour réviser efficacement.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">🎯</div>
+          <h3>Progression par paliers</h3>
+          <p>Chaque élève avance à son rythme, sans surcharge, et gagne des badges en franchissant des étapes.</p>
+        </div>
+        <div class="feature-card">
+          <div class="feature-icon">👨‍🏫</div>
+          <h3>Suivi enseignant &amp; parent</h3>
+          <p>Notes, devoirs et bilans consultables en temps réel pour accompagner l'élève vers la réussite.</p>
+        </div>
+      </div>
+    </section>
+
+    <section class="classes-list">
       <h2>Choisis ta classe</h2>
       <div id="classesContainer">Chargement des classes...</div>
     </section>
