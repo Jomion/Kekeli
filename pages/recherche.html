@@ -1,0 +1,57 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Recherche - KEKELI</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+  <header class="header">
+    <a href="../index.html"><img src="../assets/logo/logo.png" alt="KEKELI" class="logo-img"></a>
+    <button class="menu-toggle" id="menuToggle">☰</button>
+  </header>
+  <nav class="menu" id="menu">
+    <a href="cours.html">Cours</a>
+    <a href="exercices.html">Exercices</a>
+    <a href="quiz.html">Quiz</a>
+    <a href="matieres.html">Matières</a>
+    <a href="epreuves.html">Épreuves</a>
+    <a href="ressources.html">Ressources</a>
+    <a href="recherche.html">Recherche</a>
+  </nav>
+
+  <main>
+    <section class="hero" style="padding:24px 20px;">
+      <h1 style="font-size:24px;margin-bottom:16px;">Recherche</h1>
+      <input type="text" id="champRecherche" placeholder="Rechercher une séance, un exercice, un quiz..." style="width:100%;max-width:500px;padding:14px;border:1px solid var(--bordure);border-radius:8px;font-size:16px;">
+
+      <div style="margin-top:14px;display:flex;flex-wrap:wrap;gap:8px;">
+        <select id="filtreClasseRecherche" style="padding:10px 12px;border:1px solid var(--bordure);border-radius:8px;font-size:14px;">
+          <option value="">Toutes classes</option>
+        </select>
+        <select id="filtreTypeRecherche" style="padding:10px 12px;border:1px solid var(--bordure);border-radius:8px;font-size:14px;">
+          <option value="">Tous types</option>
+          <option value="seances">Séances</option>
+          <option value="exercices">Exercices</option>
+          <option value="quiz">Quiz</option>
+          <option value="epreuves">Épreuves</option>
+          <option value="ressources">Ressources</option>
+        </select>
+      </div>
+    </section>
+
+    <section class="classes-list">
+      <div id="resultatsRecherche" style="padding:0 20px;color:var(--texte-gris);">Tape au moins 2 caractères pour lancer la recherche.</div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/supabaseClient.js"></script>
+  <script src="../js/components/menu.js"></script>
+  <script src="../js/pages/recherche.js"></script>
+
+</body>
+</html>

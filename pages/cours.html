@@ -1,0 +1,49 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>Cours - KEKELI</title>
+  <link rel="stylesheet" href="../css/style.css">
+</head>
+<body>
+
+  <header class="header">
+    <a href="../index.html"><img src="../assets/logo/logo.png" alt="KEKELI" class="logo-img"></a>
+    <button class="menu-toggle" id="menuToggle">☰</button>
+  </header>
+
+  <nav class="menu" id="menu">
+    <a href="cours.html">Cours</a>
+    <a href="exercices.html">Exercices</a>
+    <a href="quiz.html">Quiz</a>
+    <a href="matieres.html">Champs de Formation</a>
+    <a href="epreuves.html">Épreuves</a>
+    <a href="ressources.html">Ressources</a>
+    <a href="recherche.html">Recherche</a>
+  </nav>
+
+  <main>
+    <section class="hero" style="padding:24px 20px;">
+      <h1 id="titreClasse" style="font-size:24px;">Cours</h1>
+      <div id="zoneSelectClasse" style="margin-top:16px;max-width:300px;display:none;">
+        <select id="selectClasseCours" style="padding:12px 14px;border:1px solid var(--bordure);border-radius:8px;font-size:16px;width:100%;">
+          <option value="">-- Choisir une classe --</option>
+        </select>
+      </div>
+    </section>
+
+    <section class="classes-list">
+      <div id="listeMatieres">Chargement...</div>
+    </section>
+  </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/@supabase/supabase-js@2"></script>
+  <script src="../js/config.js"></script>
+  <script src="../js/supabaseClient.js"></script>
+  <script src="../js/components/menu.js"></script>
+  <script src="../js/components/icones-matieres.js"></script>
+  <script src="../js/pages/cours.js"></script>
+
+</body>
+</html>
