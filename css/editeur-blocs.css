@@ -1,0 +1,373 @@
+/* ===== Éditeur par blocs ===== */
+
+.bloc-editeur {
+  border: 1px solid var(--bordure);
+  border-radius: 10px;
+  margin-bottom: 14px;
+  overflow: hidden;
+  background: white;
+}
+
+.bloc-editeur-header {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 10px 14px;
+  background: var(--bleu-clair);
+  border-bottom: 1px solid var(--bordure);
+}
+
+.bloc-editeur-titre {
+  font-weight: 600;
+  font-size: 13px;
+  color: var(--bleu-fonce);
+  display: flex;
+  align-items: center;
+  gap: 6px;
+}
+
+.bloc-editeur-actions {
+  display: flex;
+  gap: 4px;
+}
+
+.bloc-editeur-actions button {
+  background: white;
+  border: 1px solid var(--bleu-principal);
+  color: var(--bleu-principal);
+  border-radius: 6px;
+  padding: 4px 8px;
+  font-size: 13px;
+  cursor: pointer;
+}
+
+.bloc-editeur-corps {
+  padding: 10px;
+}
+
+.bloc-editeur-corps .ql-editor {
+  min-height: 100px;
+  font-size: 15px;
+}
+
+.bloc-editeur.replie .bloc-editeur-corps {
+  display: none;
+}
+
+/* ===== Rendu public des blocs ===== */
+
+.rendu-bloc {
+  margin-bottom: 20px;
+}
+
+.rendu-bloc-texte,
+.rendu-bloc-resume {
+  background: #f8fafc;
+  border: 1px solid var(--bordure);
+  padding: 14px 16px;
+  border-radius: 8px;
+}
+
+.rendu-bloc-definition,
+.rendu-bloc-regle,
+.rendu-bloc-astuce {
+  background: var(--bleu-clair);
+  border-left: 4px solid var(--bleu-principal);
+  padding: 14px 16px;
+  border-radius: 8px;
+}
+
+.rendu-bloc-exemple {
+  background: #f8fafc;
+  border: 1px dashed var(--bordure);
+  padding: 14px 16px;
+  border-radius: 8px;
+}
+
+.rendu-bloc-a_retenir {
+  background: var(--accent-clair);
+  border-left: 4px solid var(--accent);
+  padding: 14px 16px;
+  border-radius: 8px;
+}
+
+.rendu-bloc-attention_bloc {
+  background: #fef2f2;
+  border-left: 4px solid #dc2626;
+  padding: 14px 16px;
+  border-radius: 8px;
+}
+
+.rendu-bloc-image,
+.rendu-bloc-video,
+.rendu-bloc-audio,
+.rendu-bloc-tableau {
+  background: #f8fafc;
+  border: 1px solid var(--bordure);
+  padding: 14px 16px;
+  border-radius: 8px;
+}
+
+.rendu-bloc-label {
+  font-weight: 700;
+  font-size: 13px;
+  text-transform: uppercase;
+  letter-spacing: 0.5px;
+  margin-bottom: 8px;
+  display: block;
+}
+
+.rendu-bloc-texte .rendu-bloc-label,
+.rendu-bloc-resume .rendu-bloc-label { color: var(--texte-fonce); }
+.rendu-bloc-definition .rendu-bloc-label,
+.rendu-bloc-regle .rendu-bloc-label,
+.rendu-bloc-astuce .rendu-bloc-label { color: var(--bleu-principal); }
+.rendu-bloc-exemple .rendu-bloc-label { color: var(--texte-gris); }
+.rendu-bloc-a_retenir .rendu-bloc-label { color: var(--accent-fonce); }
+.rendu-bloc-attention_bloc .rendu-bloc-label { color: #dc2626; }
+
+.rendu-bloc .ql-editor {
+  padding: 0;
+}
+
+/* ===== Blocs Phase 2 : édition ===== */
+.bloc-champ {
+  width: 100%;
+  padding: 10px 12px;
+  border: 1px solid var(--bordure);
+  border-radius: 8px;
+  font-size: 15px;
+  margin-bottom: 8px;
+  box-sizing: border-box;
+}
+
+.bloc-apercu-media {
+  max-width: 100%;
+  border-radius: 8px;
+  margin-top: 8px;
+}
+
+.bloc-tableau-editeur {
+  border-collapse: collapse;
+  width: 100%;
+  margin-bottom: 10px;
+}
+
+.bloc-tableau-editeur td {
+  border: 1px solid var(--bordure);
+  padding: 4px;
+  vertical-align: top;
+}
+
+.bloc-tableau-editeur.sans-bordures td {
+  border: none;
+}
+
+.bloc-tableau-editeur input[type="text"] {
+  width: 100%;
+  border: none;
+  padding: 6px;
+  font-size: 14px;
+  box-sizing: border-box;
+}
+
+.bloc-cellule-mini-actions {
+  display: flex;
+  align-items: center;
+  gap: 4px;
+  margin-top: 4px;
+  padding: 0 4px 4px;
+}
+
+.bloc-cellule-mini-actions input[type="color"] {
+  width: 24px;
+  height: 24px;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+}
+
+.bloc-cellule-mini-actions button {
+  background: white;
+  border: 1px solid var(--bordure);
+  border-radius: 4px;
+  font-size: 11px;
+  padding: 2px 5px;
+  cursor: pointer;
+}
+
+.bloc-tableau-actions {
+  display: flex;
+  gap: 8px;
+  margin-bottom: 10px;
+  flex-wrap: wrap;
+}
+
+.bloc-upload-statut {
+  font-size: 12px;
+  color: var(--texte-gris);
+  margin-top: 6px;
+}
+
+/* ===== Rendu public Phase 2 ===== */
+.rendu-bloc-image img,
+.rendu-bloc-audio audio {
+  max-width: 100%;
+  border-radius: 8px;
+}
+
+.rendu-bloc-image figcaption {
+  font-size: 13px;
+  color: var(--texte-gris);
+  margin-top: 6px;
+  text-align: center;
+}
+
+.rendu-bloc-video iframe {
+  width: 100%;
+  aspect-ratio: 16 / 9;
+  border-radius: 8px;
+  border: none;
+}
+
+.rendu-bloc-tableau table {
+  width: 100%;
+  border-collapse: collapse;
+}
+
+.rendu-bloc-tableau table.sans-bordures td {
+  border: none;
+}
+
+.rendu-bloc-tableau td {
+  border: 1px solid var(--bordure);
+  padding: 8px;
+  font-size: 14px;
+}
+
+.rendu-bloc-exercice a,
+.rendu-bloc-ressource a {
+  display: block;
+  padding: 12px;
+  background: var(--bleu-clair);
+  border-radius: 8px;
+  text-decoration: none;
+  color: var(--bleu-fonce);
+  font-weight: 600;
+}
+/* ===== Système d'activités par niveau ===== */
+
+.activite-carte {
+  border: 1px solid var(--bordure);
+  border-radius: 10px;
+  margin-bottom: 16px;
+  overflow: hidden;
+}
+
+.activite-entete {
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  padding: 12px 14px;
+  color: white;
+}
+
+.activite-entete-niveau {
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+
+.activite-niveau-nom-fon {
+  font-size: 18px;
+  font-weight: 700;
+}
+
+.activite-niveau-nom-fr {
+  font-size: 11px;
+  opacity: 0.9;
+}
+
+.niveau-1 { background: #16a34a; }
+.niveau-2 { background: #2563eb; }
+.niveau-3 { background: #b45309; }
+.niveau-4 { background: #dc2626; }
+
+.badge-niveau-mini {
+  display: inline-block;
+  color: white;
+  font-size: 11px;
+  font-weight: 700;
+  padding: 3px 8px;
+  border-radius: 999px;
+  margin-right: 6px;
+}
+
+.activite-corps {
+  padding: 12px;
+}
+
+.activite-select-niveau {
+  padding: 6px 10px;
+  border-radius: 6px;
+  border: none;
+  font-size: 13px;
+  font-weight: 600;
+}
+
+.correction-zone {
+  margin-top: 16px;
+  padding: 14px;
+  background: #f8fafc;
+  border: 1px dashed var(--bordure);
+  border-radius: 10px;
+}
+
+.correction-zone-titre {
+  font-weight: 700;
+  font-size: 14px;
+  margin-bottom: 10px;
+  color: var(--texte-fonce);
+}
+
+.exercice-bloc-editeur {
+  border: 1px solid var(--bordure);
+  border-radius: 8px;
+  padding: 12px;
+  margin-bottom: 10px;
+  background: white;
+}
+
+.exercice-bloc-champ {
+  width: 100%;
+  padding: 8px 10px;
+  border: 1px solid var(--bordure);
+  border-radius: 6px;
+  font-size: 14px;
+  margin-bottom: 6px;
+  box-sizing: border-box;
+}
+
+.statut-niveau-ok { color: #16a34a; }
+.statut-niveau-manquant { color: #dc2626; }
+
+/* ===== Rendu public des niveaux ===== */
+.rendu-niveau-badge-grand {
+  display: inline-flex;
+  flex-direction: column;
+  align-items: center;
+  color: white;
+  padding: 10px 20px;
+  border-radius: 12px;
+  margin-bottom: 12px;
+}
+
+.rendu-niveau-badge-grand .nom-fon {
+  font-size: 22px;
+  font-weight: 800;
+}
+
+.rendu-niveau-badge-grand .nom-fr {
+  font-size: 12px;
+  opacity: 0.9;
+}
