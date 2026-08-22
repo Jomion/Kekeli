@@ -117,7 +117,7 @@ async function afficherChamps() {
           <div class="description-carte-champ">${echapper(p.description)}</div>
           <div class="pied-carte-champ">
             <span class="nb-unites-champ">${comptes[i]} Unité${comptes[i] > 1 ? 's' : ''}</span>
-            <button class="bouton-acceder-champ" type="button">Accéder →</button>
+            <button class="bouton-acceder-champ" type="button">Accéder ➔</button>
           </div>
         </div>`;
       }).join('')}
