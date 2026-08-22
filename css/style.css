@@ -97,26 +97,29 @@ a { text-decoration: none; color: inherit; }
 }
 .carte-champ {
   background: white;
-  border: 1px solid var(--bordure);
+  border-left: 5px solid var(--bleu-principal);
   border-radius: 12px;
   padding: 20px;
-  box-shadow: 0 1px 4px rgba(0,0,0,0.04);
+  box-shadow: 0 2px 8px rgba(0,0,0,0.04);
   display: flex;
   flex-direction: column;
   cursor: pointer;
-  transition: box-shadow .15s, transform .15s;
+  transition: border-color .2s, transform .2s;
 }
-.carte-champ:hover { box-shadow: 0 6px 16px rgba(0,51,102,0.1); transform: translateY(-2px); }
+.carte-champ:hover { border-left-color: var(--accent); transform: translateY(-2px); }
 .entete-carte-champ { display: flex; align-items: center; gap: 12px; margin-bottom: 10px; }
 .icone-champ {
-  flex-shrink: 0; width: 48px; height: 48px; border-radius: 10px;
-  background: var(--bleu-clair); display: flex; align-items: center; justify-content: center; font-size: 24px;
+  flex-shrink: 0; width: 48px; height: 48px; border-radius: 8px;
+  background: #F1F5F9; display: flex; align-items: center; justify-content: center; font-size: 28px;
 }
-.titre-carte-champ { font-size: 16px; font-weight: 800; color: var(--bleu-principal); line-height: 1.25; }
-.description-carte-champ { font-size: 13px; color: var(--texte-gris); line-height: 1.5; margin-bottom: 16px; flex-grow: 1; }
-.pied-carte-champ { display: flex; align-items: center; justify-content: space-between; margin-top: auto; }
-.nb-unites-champ { font-size: 13px; font-weight: 800; color: var(--bleu-principal); }
+.titre-carte-champ { font-size: 17px; font-weight: 800; color: var(--bleu-principal); line-height: 1.25; margin: 0; }
+.description-carte-champ { font-size: 13px; color: var(--texte-gris); line-height: 1.4; margin-bottom: 15px; flex-grow: 1; }
+.pied-carte-champ {
+  display: flex; align-items: center; justify-content: space-between; margin-top: auto;
+  border-top: 1px solid #F1F5F9; padding-top: 10px; font-size: 12px; font-weight: 800; color: var(--bleu-principal);
+}
+.nb-unites-champ { font-size: 12px; font-weight: 800; color: var(--bleu-principal); }
 .bouton-acceder-champ {
-  background: var(--bleu-principal); color: white; font-size: 13px; font-weight: 700;
-  padding: 8px 16px; border-radius: 8px; border: none; display: inline-flex; align-items: center; gap: 6px;
+  background: var(--bleu-principal); color: white; font-size: 12px; font-weight: 700;
+  padding: 6px 12px; border-radius: 6px; border: none; display: inline-flex; align-items: center; gap: 4px;
 }
